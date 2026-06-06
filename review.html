@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Build Review — OblakKoder POS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:         #08090E;
+            --surface:    #0C0E16;
+            --card:       #10131C;
+            --border:     rgba(255,255,255,0.055);
+            --teal:       #04D4BE;
+            --teal-glow:  rgba(4,212,190,0.14);
+            --teal-faint: rgba(4,212,190,0.06);
+            --text-muted: #445060;
+            --text:       #7A93AA;
+            --text-light: #BED0E0;
+            --white:      #E8F1FA;
+        }
+
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+
+        body {
+            font-family:'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* grain */
+        body::after {
+            content:'';
+            position:fixed; inset:0;
+            background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            background-size:200px;
+            pointer-events:none;
+            z-index:9999;
+        }
+
+        /* ambient top glow */
+        body::before {
+            content:'';
+            position:fixed;
+            top:-200px; left:50%; transform:translateX(-50%);
+            width:700px; height:500px;
+            background:radial-gradient(ellipse, rgba(4,212,190,0.07) 0%, transparent 70%);
+            pointer-events:none;
+            z-index:0;
+        }
+
+        /* ══ TOP BAR ══ */
+        .topbar {
+            position:sticky; top:0; z-index:100;
+            display:flex; align-items:center; justify-content:space-between;
+            padding:0 52px;
+            height:58px;
+            background:rgba(8,9,14,0.82);
+            backdrop-filter:blur(24px);
+            border-bottom:1px solid var(--border);
+        }
+
+        .topbar-left {
+            display:flex; align-items:center; gap:20px;
+        }
+
+        .topbar-tag {
+            font-family:'DM Mono', monospace;
+            font-size:10px;
+            color:var(--teal);
+            letter-spacing:0.14em;
+            text-transform:uppercase;
+            border:1px solid rgba(4,212,190,0.25);
+            padding:4px 10px;
+            border-radius:4px;
+            background:var(--teal-faint);
+        }
+
+        .topbar-title {
+            font-family:'DM Mono', monospace;
+            font-size:11px;
+            color:var(--text-muted);
+            letter-spacing:0.06em;
+        }
+
+        .topbar-logo img {
+            height:20px;
+            filter:brightness(0) invert(1) opacity(0.3);
+            display:block;
+            transition:opacity 0.2s;
+        }
+
+        .topbar-logo:hover img { opacity:0.55; }
+
+        /* ══ HERO ══ */
+        .hero {
+            position:relative;
+            padding:96px 52px 80px;
+            z-index:1;
+        }
+
+        .hero-kicker {
+            display:flex; align-items:center; gap:12px;
+            font-family:'DM Mono', monospace;
+            font-size:11px;
+            color:var(--teal);
+            letter-spacing:0.16em;
+            text-transform:uppercase;
+            margin-bottom:36px;
+        }
+
+        .hero-kicker-line {
+            width:36px; height:1px;
+            background:var(--teal);
+            opacity:0.5;
+        }
+
+        .hero-h1 {
+            font-family:'Cormorant Garamond', Georgia, serif;
+            font-size:clamp(72px, 9vw, 128px);
+            font-weight:300;
+            line-height:0.96;
+            color:var(--white);
+            letter-spacing:-0.025em;
+            max-width:1040px;
+        }
+
+        .hero-h1 em {
+            font-style:italic;
+            color:var(--teal);
+            font-weight:300;
+        }
+
+        .hero-byline {
+            margin-top:40px;
+            display:flex;
+            align-items:flex-start;
+            gap:60px;
+        }
+
+        .hero-desc {
+            font-size:15px;
+            line-height:1.75;
+            color:var(--text);
+            max-width:440px;
+        }
+
+        .hero-meta {
+            flex-shrink:0;
+            display:flex;
+            flex-direction:column;
+            gap:6px;
+        }
+
+        .hero-meta-row {
+            font-family:'DM Mono', monospace;
+            font-size:10px;
+            color:var(--text-muted);
+            letter-spacing:0.08em;
+            display:flex;
+            gap:8px;
+        }
+
+        .hero-meta-row span:first-child {
+            color:var(--teal);
+            min-width:60px;
+        }
+
+        /* ══ STAT STRIP ══ */
+        .stat-strip {
+            display:grid;
+            grid-template-columns:repeat(4,1fr);
+            gap:1px;
+            background:var(--border);
+            border:1px solid var(--border);
+            border-radius:10px;
+            overflow:hidden;
+            margin:64px 52px;
+            position:relative; z-index:1;
+        }
+
+        .stat-cell {
+            background:var(--surface);
+            padding:28px 32px;
+            display:flex;
+            flex-direction:column;
+            gap:8px;
+            transition:background 0.25s;
+        }
+
+        .stat-cell:hover { background:var(--card); }
+
+        .stat-num {
+            font-family:'Cormorant Garamond', serif;
+            font-size:56px;
+            font-weight:300;
+            color:var(--white);
+            line-height:1;
+            letter-spacing:-0.03em;
+        }
+
+        .stat-label {
+            font-family:'DM Mono', monospace;
+            font-size:10px;
+            color:var(--text-muted);
+            letter-spacing:0.1em;
+            text-transform:uppercase;
+        }
+
+        /* ══ SECTION HEADER ══ */
+        .section-hdr {
+            padding:80px 52px 52px;
+            position:relative; z-index:1;
+        }
+
+        .eyebrow {
+            display:flex; align-items:center; gap:10px;
+            font-family:'DM Mono', monospace;
+            font-size:10px;
+            color:var(--teal);
+            letter-spacing:0.14em;
+            text-transform:uppercase;
+            margin-bottom:14px;
+        }
+
+        .eyebrow::before {
+            content:'';
+            width:20px; height:1px;
+            background:var(--teal); opacity:0.5;
+        }
+
+        .section-h2 {
+            font-family:'Cormorant Garamond', serif;
+            font-size:clamp(44px, 5vw, 68px);
+            font-weight:300;
+            color:var(--white);
+            line-height:1.05;
+            letter-spacing:-0.02em;
+            max-width:660px;
+        }
+
+        .section-h2 em { font-style:italic; color:var(--text-light); }
+
+        .section-sub {
+            margin-top:14px;
+            font-size:14px;
+            line-height:1.7;
+            color:var(--text);
+            max-width:460px;
+        }
+
+        /* ══ PAGE SHOWCASE ══ */
+        .showcase-block {
+            padding:0 52px 100px;
+            position:relative; z-index:1;
+        }
+
+        .showcase-row {
+            display:grid;
+            grid-template-columns:1fr 1.55fr;
+            gap:64px;
+            align-items:start;
+            margin-bottom:100px;
+        }
+
+        .showcase-row.flip {
+            grid-template-columns:1.55fr 1fr;
+        }
+
+        .showcase-row.flip .info { order:2; }
+        .showcase-row.flip .screen { order:1; }
+
+        .info { padding-top:12px; }
+
+        .info-index {
+            font-family:'DM Mono', monospace;
+            font-size:10px;
+            color:var(--teal);
+            letter-spacing:0.14em;
+            text-transform:uppercase;
+            margin-bottom:16px;
+            display:flex; align-items:center; gap:10px;
+        }
+
+        .info-index::before {
+            content:''; width:20px; height:1px;
+            background:var(--teal); opacity:0.5;
+        }
+
+        .info-title {
+            font-family:'Cormorant Garamond', serif;
+            font-size:42px;
+            font-weight:500;
+            color:var(--white);
+            line-height:1.08;
+            letter-spacing:-0.015em;
+            margin-bottom:16px;
+        }
+
+        .info-title em { font-style:italic; color:var(--text-light); }
+
+        .info-desc {
+            font-size:13.5px;
+            line-height:1.78;
+            color:var(--text);
+            margin-bottom:28px;
+        }
+
+        .feature-list {
+            list-style:none;
+            display:flex;
+            flex-direction:column;
+            gap:11px;
+        }
+
+        .feature-list li {
+            display:flex;
+            align-items:baseline;
+            gap:11px;
+            font-size:13px;
+            color:var(--text-light);
+            line-height:1.5;
+        }
+
+        .feature-list li::before {
+            content:'→';
+            font-family:'DM Mono', monospace;
+            font-size:11px;
+            color:var(--teal);
+            flex-shrink:0;
+        }
+
+        /* Browser frame */
+        .browser-wrap {
+            position:relative;
+        }
+
+        /* subtle glow behind frame */
+        .browser-wrap::before {
+            content:'';
+            position:absolute;
+            inset:-20px;
+            background:radial-gradient(ellipse at 50% 30%, rgba(4,212,190,0.1) 0%, transparent 70%);
+            z-index:0;
+            border-radius:20px;
+        }
+
+        .browser-frame {
+            position:relative; z-index:1;
+            background:#181E2C;
+            border-radius:10px;
+            overflow:hidden;
+            border:1px solid rgba(255,255,255,0.07);
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,0.03),
+                0 40px 100px rgba(0,0,0,0.8),
+                0 12px 32px rgba(0,0,0,0.6);
+        }
+
+        .browser-bar {
+            height:36px;
+            background:#1D2436;
+            border-bottom:1px solid rgba(255,255,255,0.045);
+            display:flex;
+            align-items:center;
+            padding:0 14px;
+            gap:7px;
+        }
+
+        .dot { width:9px; height:9px; border-radius:50%; }
+        .dot.r { background:#FF5F56; }
+        .dot.y { background:#FEBC2E; }
+        .dot.g { background:#28C840; }
+
+        .browser-url {
+            flex:1; margin:0 12px;
+            height:20px;
+            background:rgba(255,255,255,0.04);
+            border-radius:4px;
+            display:flex;
+            align-items:center;
+            padding:0 10px;
+            font-family:'DM Mono', monospace;
+            font-size:9.5px;
+            color:var(--text-muted);
+        }
+
+        .browser-img {
+            width:100%;
+            display:block;
+            max-height:540px;
+            object-fit:cover;
+            object-position:top;
+        }
+
+        /* fade out bottom of screenshot */
+        .browser-fade {
+            position:absolute;
+            bottom:0; left:0; right:0;
+            height:80px;
+            background:linear-gradient(to bottom, transparent, #181E2C);
+            z-index:2;
+            pointer-events:none;
+        }
+
+        /* ══ DESIGN SYSTEM ══ */
+        .design-system {
+            padding:72px 52px 88px;
+            border-top:1px solid var(--border);
+            position:relative; z-index:1;
+        }
+
+        .ds-grid {
+            display:grid;
+            grid-template-columns:1fr 1.2fr;
+            gap:80px;
+            margin-top:52px;
+        }
+
+        .ds-label {
+            font-family:'DM Mono', monospace;
+            font-size:10px;
+            color:var(--text-muted);
+            letter-spacing:0.12em;
+            text-transform:uppercase;
+            margin-bottom:24px;
+        }
+
+        /* Color palette */
+        .swatches {
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+        }
+
+        .swatch {
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            gap:7px;
+        }
+
+        .swatch-dot {
+            width:44px; height:44px;
+            border-radius:50%;
+            border:1px solid rgba(255,255,255,0.07);
+        }
+
+        .swatch-hex {
+            font-family:'DM Mono', monospace;
+            font-size:8.5px;
+            color:var(--text-muted);
+            letter-spacing:0.04em;
+        }
+
+        /* Type specimens */
+        .type-stack {
+            display:flex;
+            flex-direction:column;
+            gap:24px;
+        }
+
+        .type-row { display:flex; flex-direction:column; gap:5px; }
+
+        .type-tag {
+            font-family:'DM Mono', monospace;
+            font-size:9px;
+            color:var(--text-muted);
+            letter-spacing:0.1em;
+            text-transform:uppercase;
+        }
+
+        .t-display {
+            font-family:'Syne', sans-serif;
+            font-size:36px;
+            font-weight:800;
+            color:var(--white);
+            letter-spacing:-0.025em;
+            line-height:1;
+        }
+
+        .t-body {
+            font-family:'DM Sans', sans-serif;
+            font-size:15px;
+            color:var(--text);
+            line-height:1.72;
+        }
+
+        .t-mono {
+            font-family:'DM Mono', monospace;
+            font-size:12px;
+            color:var(--teal);
+            letter-spacing:0.06em;
+        }
+
+        /* ══ FOOTER ══ */
+        footer {
+            padding:40px 52px;
+            border-top:1px solid var(--border);
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            position:relative; z-index:1;
+        }
+
+        .footer-copy {
+            font-family:'DM Mono', monospace;
+            font-size:10px;
+            color:var(--text-muted);
+            letter-spacing:0.07em;
+        }
+
+        .footer-logo img {
+            height:17px;
+            filter:brightness(0) invert(1) opacity(0.18);
+            display:block;
+        }
+
+        /* ══ DIVIDER ══ */
+        .rule {
+            height:1px;
+            background:var(--border);
+            margin:0 52px;
+        }
+
+        /* ══ ANIMATION ══ */
+        @keyframes fadeUp {
+            from { opacity:0; transform:translateY(24px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+
+        .hero-kicker { animation:fadeUp 0.6s ease both; }
+        .hero-h1     { animation:fadeUp 0.7s 0.08s ease both; }
+        .hero-byline { animation:fadeUp 0.7s 0.18s ease both; }
+        .stat-strip  { animation:fadeUp 0.7s 0.28s ease both; }
+    </style>
+</head>
+<body>
+
+    <!-- TOP BAR -->
+    <nav class="topbar">
+        <div class="topbar-left">
+            <span class="topbar-tag">Build Review</span>
+            <span class="topbar-title">Day 5 · June 6, 2026</span>
+        </div>
+        <a class="topbar-logo" href="#">
+            <img src="brand_assets/logo-blue.svg" alt="OblakKoder">
+        </a>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-kicker">
+            <div class="hero-kicker-line"></div>
+            OblakKoder POS — Website Build
+        </div>
+        <h1 class="hero-h1">
+            A complete<br>
+            <em>point of sale</em><br>
+            site, shipped.
+        </h1>
+        <div class="hero-byline">
+            <p class="hero-desc">Two full marketing pages designed and built in a single session — a high-converting website for OblakKoder's cloud-native POS platform targeting independent retailers.</p>
+            <div class="hero-meta">
+                <div class="hero-meta-row"><span>Product</span> OblakKoder POS</div>
+                <div class="hero-meta-row"><span>Stack</span> HTML · Tailwind CSS</div>
+                <div class="hero-meta-row"><span>Fonts</span> Syne + DM Sans</div>
+                <div class="hero-meta-row"><span>Accent</span> #04D4BE</div>
+                <div class="hero-meta-row"><span>Theme</span> Dark · Navy/Teal</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- STATS -->
+    <div class="stat-strip">
+        <div class="stat-cell">
+            <span class="stat-num">2</span>
+            <span class="stat-label">Pages built</span>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-num">9</span>
+            <span class="stat-label">Sections designed</span>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-num">8</span>
+            <span class="stat-label">Feature callouts</span>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-num">1</span>
+            <span class="stat-label">Brand system</span>
+        </div>
+    </div>
+
+    <!-- SECTION HEADER -->
+    <div class="section-hdr">
+        <div class="eyebrow">What was built</div>
+        <h2 class="section-h2">Two pages.<br><em>One cohesive system.</em></h2>
+        <p class="section-sub">Starting from a logo and a hex value, a full marketing site was constructed — from the hero to the footer.</p>
+    </div>
+
+    <!-- PAGE SHOWCASE -->
+    <div class="showcase-block">
+
+        <!-- Homepage -->
+        <div class="showcase-row">
+            <div class="info">
+                <div class="info-index">01 — Landing Page</div>
+                <h3 class="info-title">The homepage<br><em>that converts.</em></h3>
+                <p class="info-desc">A full marketing landing page for the cloud-native POS product — hero, feature overview, onboarding steps, integrations, pricing, testimonials, and footer, all in one dark-mode system.</p>
+                <ul class="feature-list">
+                    <li>Hero with animated radial teal glow</li>
+                    <li>Social-proof stat bar (500+ stores, 4.8 stars, 99.9% uptime)</li>
+                    <li>6-card feature overview grid</li>
+                    <li>3-step "up and running on day one" sequence</li>
+                    <li>Integrations compatibility section</li>
+                    <li>Single-tier pricing card at $19.99/mo</li>
+                    <li>Star-rated testimonials from store owners</li>
+                    <li>Full site footer with nav links</li>
+                </ul>
+            </div>
+            <div class="screen">
+                <div class="browser-wrap">
+                    <div class="browser-frame">
+                        <div class="browser-bar">
+                            <div class="dot r"></div>
+                            <div class="dot y"></div>
+                            <div class="dot g"></div>
+                            <div class="browser-url">oblakkoder.com</div>
+                        </div>
+                        <img class="browser-img" src="temporary%20screenshots/screenshot-6-final.png" alt="OblakKoder Homepage">
+                        <div class="browser-fade"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Page -->
+        <div class="showcase-row flip">
+            <div class="screen">
+                <div class="browser-wrap">
+                    <div class="browser-frame">
+                        <div class="browser-bar">
+                            <div class="dot r"></div>
+                            <div class="dot y"></div>
+                            <div class="dot g"></div>
+                            <div class="browser-url">oblakkoder.com/features</div>
+                        </div>
+                        <img class="browser-img" src="temporary%20screenshots/screenshot-9-features-page.png" alt="OblakKoder Features Page">
+                        <div class="browser-fade"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="info">
+                <div class="info-index">02 — Features Page</div>
+                <h3 class="info-title">Every feature,<br><em>clearly shown.</em></h3>
+                <p class="info-desc">A dedicated deep-dive page walking through each capability with alternating layout rows — inline UI mockups on one side, concise value-focused copy on the other.</p>
+                <ul class="feature-list">
+                    <li>Hero with animated teal gradient headline</li>
+                    <li>8 feature rows with alternating layout rhythm</li>
+                    <li>Inline UI mockups built entirely in HTML/CSS</li>
+                    <li>Receipt mockup, inventory table, analytics chart</li>
+                    <li>Dashboard and product-add form facsimiles</li>
+                    <li>Hardware compatibility section</li>
+                    <li>Closing CTA with "see it running in your store"</li>
+                    <li>Shared nav + footer system with homepage</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="rule"></div>
+
+    <!-- DESIGN SYSTEM -->
+    <div class="design-system">
+        <div class="eyebrow">Design system</div>
+        <h2 class="section-h2" style="margin-bottom:0;">The visual<br><em>language.</em></h2>
+
+        <div class="ds-grid">
+            <!-- Colors -->
+            <div>
+                <div class="ds-label">Color Palette</div>
+                <div class="swatches">
+                    <div class="swatch">
+                        <div class="swatch-dot" style="background:#060D1A;"></div>
+                        <span class="swatch-hex">#060D1A</span>
+                    </div>
+                    <div class="swatch">
+                        <div class="swatch-dot" style="background:#0A1628;"></div>
+                        <span class="swatch-hex">#0A1628</span>
+                    </div>
+                    <div class="swatch">
+                        <div class="swatch-dot" style="background:#0E1C33;"></div>
+                        <span class="swatch-hex">#0E1C33</span>
+                    </div>
+                    <div class="swatch">
+                        <div class="swatch-dot" style="background:#04D4BE; box-shadow:0 0 14px rgba(4,212,190,0.45);"></div>
+                        <span class="swatch-hex" style="color:#04D4BE;">#04D4BE</span>
+                    </div>
+                    <div class="swatch">
+                        <div class="swatch-dot" style="background:#7A93AA;"></div>
+                        <span class="swatch-hex">#7A93AA</span>
+                    </div>
+                    <div class="swatch">
+                        <div class="swatch-dot" style="background:#C2D6E8;"></div>
+                        <span class="swatch-hex">#C2D6E8</span>
+                    </div>
+                    <div class="swatch">
+                        <div class="swatch-dot" style="background:#EBF3FF;"></div>
+                        <span class="swatch-hex">#EBF3FF</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Typography -->
+            <div>
+                <div class="ds-label">Typography</div>
+                <div class="type-stack">
+                    <div class="type-row">
+                        <span class="type-tag">Syne 800 — Display headings</span>
+                        <div class="t-display">Sales under control.</div>
+                    </div>
+                    <div class="type-row">
+                        <span class="type-tag">DM Sans 400 — Body copy</span>
+                        <div class="t-body">Wait tables automatically. Instantly.<br>In your store, from day one.</div>
+                    </div>
+                    <div class="type-row">
+                        <span class="type-tag">DM Mono 400 — Labels & metadata</span>
+                        <div class="t-mono">→ oblakkoder.com/features</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <span class="footer-copy">OblakKoder POS · Day 5 Build Review · June 2026</span>
+        <div class="footer-logo">
+            <img src="brand_assets/logo-blue.svg" alt="OblakKoder">
+        </div>
+    </footer>
+
+</body>
+</html>
