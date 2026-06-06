@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OblakKoder POS — Cloud-Native Point of Sale</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --ink:        #060D1A;
+            --navy:       #0A1628;
+            --card:       #0E1C33;
+            --card2:      #111E36;
+            --border:     rgba(255,255,255,0.07);
+            --teal:       #04D4BE;
+            --teal-dim:   rgba(4,212,190,0.08);
+            --teal-glow:  rgba(4,212,190,0.22);
+            --text:       #7A93AA;
+            --text-light: #C2D6E8;
+            --white:      #EBF3FF;
+        }
+
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--ink);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        h1,h2,h3,h4,.syne { font-family:'Syne',sans-serif; }
+
+        /* noise overlay */
+        body::after {
+            content:'';
+            position:fixed; inset:0;
+            background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+            background-size:180px;
+            pointer-events:none;
+            z-index:9998;
+        }
+
+        /* ══════════════════════ NAV ══════════════════════ */
+        .site-nav {
+            position:fixed; top:0; left:0; right:0; z-index:200;
+            display:flex; align-items:center; justify-content:space-between;
+            padding:0 40px;
+            height:68px;
+            background:rgba(6,13,26,0.72);
+            backdrop-filter:blur(20px);
+            border-bottom:1px solid var(--border);
+            transition:background 0.3s;
+        }
+
+        .nav-logo {
+            display:flex; align-items:center; gap:10px;
+            text-decoration:none;
+        }
+        .logo-img {
+            height:26px; width:auto;
+            filter: brightness(0) invert(1);
+            display:block;
+        }
+
+        .nav-links {
+            display:flex; align-items:center; gap:32px; list-style:none;
+        }
+        .nav-links a {
+            color:var(--text); text-decoration:none; font-size:14px; font-weight:400;
+            transition:color 0.2s;
+        }
+        .nav-links a:hover { color:var(--white); }
+        .nav-cta {
+            background:var(--teal) !important; color:var(--ink) !important;
+            padding:9px 20px !important; border-radius:7px;
+            font-weight:600 !important; font-size:13px !important;
+            transition:background 0.2s, transform 0.15s, box-shadow 0.2s !important;
+        }
+        .nav-cta:hover {
+            background:#08ECD4 !important;
+            transform:translateY(-1px);
+            box-shadow:0 6px 20px var(--teal-glow) !important;
+        }
+
+        .hamburger {
+            display:none; background:none; border:none; cursor:pointer; padding:4px;
+        }
+
+        /* ══════════════════════ HERO ══════════════════════ */
+        .hero {
+            position:relative;
+            min-height:100vh;
+            display:flex; align-items:center;
+            padding:100px 40px 72px;
+            overflow:hidden;
+        }
+
+        /* dot grid */
+        .hero::before {
+            content:'';
+            position:absolute; inset:0;
+            background-image:radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px);
+            background-size:36px 36px;
+            pointer-events:none; z-index:0;
+        }
+
+        /* blobs */
+        .blob {
+            position:absolute; border-radius:50%;
+            filter:blur(90px); pointer-events:none;
+        }
+        .blob-a {
+            width:700px; height:700px;
+            background:radial-gradient(circle, rgba(4,212,190,0.14) 0%, transparent 65%);
+            top:-180px; left:-250px;
+            animation:bA 14s ease-in-out infinite;
+        }
+        .blob-b {
+            width:600px; height:600px;
+            background:radial-gradient(circle, rgba(10,40,120,0.45) 0%, transparent 65%);
+            top:150px; right:-180px;
+            animation:bB 18s ease-in-out infinite;
+        }
+        .blob-c {
+            width:350px; height:350px;
+            background:radial-gradient(circle, rgba(4,212,190,0.09) 0%, transparent 65%);
+            bottom:60px; right:380px;
+            animation:bC 11s ease-in-out infinite;
+        }
+        @keyframes bA { 0%,100%{transform:translate(0,0) scale(1)} 40%{transform:translate(40px,-30px) scale(1.07)} 70%{transform:translate(-18px,22px) scale(0.96)} }
+        @keyframes bB { 0%,100%{transform:translate(0,0) scale(1)} 35%{transform:translate(-28px,18px) scale(1.05)} 68%{transform:translate(22px,-14px) scale(0.97)} }
+        @keyframes bC { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(18px,-22px) scale(1.1)} }
+
+        .hero-inner {
+            position:relative; z-index:2;
+            display:grid; grid-template-columns:1fr 1fr;
+            gap:64px; align-items:center;
+            max-width:1080px; margin:0 auto; width:100%;
+        }
+
+        .hero-badge {
+            display:inline-flex; align-items:center; gap:8px;
+            background:rgba(4,212,190,0.07);
+            border:1px solid rgba(4,212,190,0.18);
+            border-radius:100px; padding:5px 14px 5px 8px;
+            margin-bottom:26px;
+        }
+        .badge-pulse {
+            width:7px; height:7px; background:var(--teal); border-radius:50%;
+            animation:pulse 2.2s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.45;transform:scale(0.75)} }
+        .badge-txt { font-size:11.5px; font-weight:500; color:var(--teal); letter-spacing:0.05em; }
+
+        .hero-h1 {
+            font-family:'Syne',sans-serif;
+            font-size:clamp(38px,4.6vw,62px);
+            font-weight:700; line-height:1.08; letter-spacing:-0.025em;
+            color:var(--white); margin-bottom:22px;
+        }
+        .hero-h1 .accent { color:var(--teal); }
+
+        .hero-p {
+            font-size:17px; font-weight:300; line-height:1.72;
+            color:var(--text); max-width:460px; margin-bottom:38px;
+        }
+
+        .hero-btns { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+
+        .btn-primary {
+            display:inline-flex; align-items:center; gap:8px;
+            background:var(--teal); color:var(--ink);
+            font-family:'Syne',sans-serif; font-weight:700; font-size:14px;
+            padding:14px 28px; border-radius:8px;
+            text-decoration:none; border:none; cursor:pointer;
+            transition:background 0.2s, transform 0.15s, box-shadow 0.2s;
+        }
+        .btn-primary:hover {
+            background:#08ECD4;
+            transform:translateY(-2px);
+            box-shadow:0 14px 36px var(--teal-glow);
+        }
+        .btn-primary:active { transform:translateY(0); }
+
+        .btn-ghost {
+            display:inline-flex; align-items:center; gap:8px;
+            background:transparent; color:var(--text-light);
+            font-size:14px; font-weight:400;
+            padding:14px 22px; border-radius:8px;
+            text-decoration:none; border:1px solid var(--border); cursor:pointer;
+            transition:border-color 0.2s, color 0.2s, background 0.2s;
+        }
+        .btn-ghost:hover {
+            border-color:rgba(255,255,255,0.14); color:var(--white);
+            background:rgba(255,255,255,0.035);
+        }
+
+        .hero-price-row {
+            display:flex; align-items:center; gap:12px;
+            margin-top:28px; padding-top:28px;
+            border-top:1px solid var(--border);
+        }
+        .price-big {
+            font-family:'Syne',sans-serif; font-size:28px; font-weight:700;
+            color:var(--white); letter-spacing:-0.02em;
+        }
+        .price-meta { font-size:13px; color:var(--text); line-height:1.45; }
+        .price-meta span { color:rgba(4,212,190,0.75); }
+
+        /* ── POS MOCKUP ── */
+        .pos-wrap { position:relative; padding:20px 60px 40px 20px; }
+
+        .pos-screen {
+            background:#142748;
+            border:1px solid rgba(255,255,255,0.2);
+            border-radius:20px; padding:26px;
+            box-shadow:
+                0 2px 0 rgba(255,255,255,0.08) inset,
+                0 50px 100px rgba(0,0,0,0.7),
+                0 0 0 1px rgba(4,212,190,0.25),
+                0 0 100px rgba(4,212,190,0.15);
+            transform:perspective(1100px) rotateY(-9deg) rotateX(4deg);
+            transition:transform 0.45s cubic-bezier(0.22,1,0.36,1);
+        }
+        .pos-screen:hover {
+            transform:perspective(1100px) rotateY(-4deg) rotateX(2deg);
+        }
+
+        .pos-hdr {
+            display:flex; align-items:center; justify-content:space-between;
+            padding-bottom:16px; margin-bottom:16px;
+            border-bottom:1px solid rgba(255,255,255,0.1);
+        }
+        .pos-hdr-l { display:flex; align-items:center; gap:9px; }
+        .pos-chip {
+            width:28px; height:28px; background:var(--teal); border-radius:6px;
+            display:flex; align-items:center; justify-content:center;
+            font-family:'Syne',sans-serif; font-weight:800; font-size:11px; color:var(--ink);
+        }
+        .pos-name { font-family:'Syne',sans-serif; font-size:12.5px; font-weight:700; color:var(--white); }
+        .pos-live {
+            display:flex; align-items:center; gap:5px;
+            background:rgba(4,212,190,0.1); padding:4px 10px; border-radius:20px;
+        }
+        .live-dot { width:5px; height:5px; background:var(--teal); border-radius:50%; animation:pulse 2s infinite; }
+        .live-txt { font-size:9px; font-weight:700; color:var(--teal); letter-spacing:0.08em; text-transform:uppercase; }
+
+        .pos-items { margin-bottom:14px; }
+        .pos-row {
+            display:flex; align-items:center; justify-content:space-between;
+            padding:9px 0; border-bottom:1px solid rgba(255,255,255,0.04);
+            animation:slideIn 0.4s cubic-bezier(0.22,1,0.36,1) both;
+        }
+        .pos-row:last-child { border-bottom:none; }
+        .pos-row:nth-child(1){animation-delay:0.55s}
+        .pos-row:nth-child(2){animation-delay:0.7s}
+        .pos-row:nth-child(3){animation-delay:0.85s}
+        .pos-row:nth-child(4){animation-delay:1s}
+        @keyframes slideIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:none} }
+
+        .pos-item-n { font-size:13px; color:rgba(194,214,232,0.9); }
+        .pos-item-q {
+            font-size:11px; color:rgba(122,147,170,0.9);
+            background:rgba(255,255,255,0.08); padding:2px 8px; border-radius:4px; margin-left:auto; margin-right:14px;
+        }
+        .pos-item-p { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:#fff; }
+
+        .pos-div { height:1px; background:var(--border); margin:12px 0; }
+
+        .pos-total-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+        .pos-total-lbl { font-size:11px; color:var(--text); text-transform:uppercase; letter-spacing:0.07em; font-weight:500; }
+        .pos-total-amt { font-family:'Syne',sans-serif; font-size:24px; font-weight:800; color:var(--white); letter-spacing:-0.03em; }
+
+        .pos-pay-btn {
+            width:100%; background:var(--teal); color:var(--ink);
+            font-family:'Syne',sans-serif; font-weight:700; font-size:13px; letter-spacing:0.03em;
+            padding:12px; border-radius:8px; border:none; cursor:pointer;
+            display:flex; align-items:center; justify-content:center; gap:7px;
+            transition:background 0.2s;
+        }
+        .pos-pay-btn:hover { background:#08ECD4; }
+
+        .pos-methods {
+            display:grid; grid-template-columns:1fr 1fr 1fr;
+            gap:8px; margin-top:9px;
+        }
+        .pay-m {
+            background:rgba(255,255,255,0.035);
+            border:1px solid var(--border);
+            border-radius:6px; padding:7px 0;
+            text-align:center; font-size:10px; font-weight:600;
+            color:var(--text); letter-spacing:0.05em; text-transform:uppercase;
+        }
+        .pay-m.on { border-color:rgba(4,212,190,0.3); background:rgba(4,212,190,0.07); color:var(--teal); }
+
+        /* floating badges */
+        .fbadge {
+            position:absolute;
+            background:#102038; border:1px solid rgba(255,255,255,0.14);
+            border-radius:12px; padding:11px 16px;
+            display:flex; align-items:center; gap:11px;
+            box-shadow:0 20px 44px rgba(0,0,0,0.5), 0 0 0 1px rgba(4,212,190,0.08);
+        }
+        .fbadge-1 { bottom:-18px; left:-38px; animation:floatY 4s ease-in-out infinite; }
+        .fbadge-2 { top:16px; right:-46px; animation:floatY 4.5s ease-in-out infinite; animation-delay:2s; }
+        @keyframes floatY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+        .fb-ico {
+            width:34px; height:34px; border-radius:9px;
+            display:flex; align-items:center; justify-content:center;
+            flex-shrink:0;
+        }
+        .fb-ico.g { background:rgba(0,205,120,0.14); }
+        .fb-ico.b { background:rgba(64,140,255,0.14); }
+        .fb-val { font-family:'Syne',sans-serif; font-size:15px; font-weight:800; color:var(--white); }
+        .fb-lbl { font-size:11px; color:var(--text); }
+
+        /* ══════════════════════ STATS ══════════════════════ */
+        .stats-bar {
+            border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+            background:rgba(255,255,255,0.012);
+            padding:36px 40px;
+        }
+        .stats-inner {
+            max-width:1080px; margin:0 auto;
+            display:grid; grid-template-columns:repeat(4,1fr); gap:24px;
+        }
+        .stat-item { text-align:center; }
+        .stat-val {
+            font-family:'Syne',sans-serif; font-size:36px; font-weight:700;
+            color:var(--white); letter-spacing:-0.025em; line-height:1; margin-bottom:6px;
+        }
+        .stat-val em { color:var(--teal); font-style:normal; }
+        .stat-lbl { font-size:13px; color:var(--text); }
+
+        /* ══════════════════════ SECTION COMMONS ══════════════════════ */
+        .section { padding:88px 40px; }
+        .sec-inner { max-width:1080px; margin:0 auto; }
+
+        .sec-label {
+            display:inline-flex; align-items:center; gap:10px;
+            font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase;
+            color:var(--teal); margin-bottom:14px;
+        }
+        .sec-label::before {
+            content:''; width:18px; height:1.5px; background:var(--teal); border-radius:2px;
+        }
+        .sec-h2 {
+            font-family:'Syne',sans-serif;
+            font-size:clamp(28px,3.2vw,46px);
+            font-weight:700; line-height:1.12; letter-spacing:-0.02em;
+            color:var(--white); margin-bottom:14px;
+        }
+        .sec-sub {
+            font-size:17px; line-height:1.7; color:var(--text);
+            max-width:520px; font-weight:300;
+        }
+
+        /* ══════════════════════ FEATURES ══════════════════════ */
+        .features-sec { background:var(--ink); }
+
+        .feat-grid {
+            display:grid; grid-template-columns:repeat(3,1fr);
+            gap:2px; margin-top:60px;
+            border:1px solid var(--border); border-radius:16px; overflow:hidden;
+        }
+        .feat-card {
+            background:var(--card); padding:30px 26px;
+            transition:background 0.25s; position:relative;
+        }
+        .feat-card::after {
+            content:''; position:absolute; inset:0;
+            border:1px solid transparent;
+            transition:border-color 0.25s; pointer-events:none;
+        }
+        .feat-card:hover { background:rgba(14,28,51,0.9); }
+        .feat-card:hover::after { border-color:rgba(4,212,190,0.13); }
+
+        .feat-ico {
+            width:46px; height:46px;
+            background:var(--teal-dim); border:1px solid rgba(4,212,190,0.14);
+            border-radius:12px; display:flex; align-items:center; justify-content:center;
+            margin-bottom:20px;
+            transition:background 0.25s, box-shadow 0.25s;
+        }
+        .feat-card:hover .feat-ico {
+            background:rgba(4,212,190,0.13);
+            box-shadow:0 0 22px rgba(4,212,190,0.14);
+        }
+        .feat-h3 {
+            font-family:'Syne',sans-serif; font-size:16px; font-weight:700;
+            color:var(--white); margin-bottom:10px; letter-spacing:-0.01em;
+        }
+        .feat-p { font-size:14px; line-height:1.65; color:var(--text); font-weight:300; }
+
+        /* ══════════════════════ HOW IT WORKS ══════════════════════ */
+        .how-sec { background:var(--navy); }
+
+        .steps-grid {
+            display:grid; grid-template-columns:repeat(3,1fr);
+            gap:56px; margin-top:60px; position:relative;
+        }
+        .steps-grid::before {
+            content:'';
+            position:absolute; top:58px; left:calc(33.33% - 14px); right:calc(33.33% - 14px);
+            height:1px;
+            background:linear-gradient(90deg, rgba(4,212,190,0.25) 0%, rgba(4,212,190,0.08) 50%, rgba(4,212,190,0.25) 100%);
+        }
+
+        .step-num {
+            font-family:'Syne',sans-serif; font-size:42px; font-weight:700;
+            color:rgba(4,212,190,0.28); letter-spacing:-0.03em; line-height:1;
+            margin-bottom:14px;
+        }
+        .step-ico {
+            width:52px; height:52px;
+            background:var(--teal-dim); border:1px solid rgba(4,212,190,0.18);
+            border-radius:13px; display:flex; align-items:center; justify-content:center;
+            margin-bottom:20px;
+        }
+        .step-h3 {
+            font-family:'Syne',sans-serif; font-size:18px; font-weight:600;
+            color:var(--white); margin-bottom:12px; letter-spacing:0;
+        }
+        .step-p { font-size:15px; line-height:1.7; color:var(--text); font-weight:300; }
+
+        /* ══════════════════════ INTEGRATIONS ══════════════════════ */
+        .int-sec { background:var(--ink); }
+
+        .int-grid {
+            display:grid; grid-template-columns:repeat(2,1fr);
+            gap:20px; margin-top:60px;
+        }
+        .int-card {
+            background:var(--card); border:1px solid var(--border);
+            border-radius:16px; padding:26px; display:flex; gap:18px; align-items:flex-start;
+            transition:border-color 0.25s, transform 0.2s, box-shadow 0.25s;
+        }
+        .int-card:hover {
+            border-color:rgba(4,212,190,0.18);
+            transform:translateY(-2px);
+            box-shadow:0 20px 40px rgba(0,0,0,0.2);
+        }
+        .int-logo {
+            width:54px; height:54px; border-radius:12px; flex-shrink:0;
+            display:flex; align-items:center; justify-content:center;
+        }
+        .int-h3 {
+            font-family:'Syne',sans-serif; font-size:16px; font-weight:700;
+            color:var(--white); margin-bottom:8px;
+        }
+        .int-p { font-size:14px; line-height:1.62; color:var(--text); font-weight:300; }
+        .int-tag {
+            display:inline-block; margin-top:11px;
+            background:rgba(4,212,190,0.08); border:1px solid rgba(4,212,190,0.18);
+            border-radius:20px; padding:4px 12px;
+            font-size:11px; font-weight:600; color:var(--teal); letter-spacing:0.04em;
+        }
+
+        /* ══════════════════════ PRICING ══════════════════════ */
+        .price-sec { background:var(--navy); }
+
+        .price-card {
+            max-width:460px; margin:60px auto 0;
+            background:var(--card); border:1px solid var(--border);
+            border-radius:24px; overflow:hidden;
+            box-shadow:0 40px 80px rgba(0,0,0,0.3), 0 0 0 1px rgba(4,212,190,0.05);
+        }
+        .price-top {
+            padding:36px 36px 28px;
+            border-bottom:1px solid var(--border);
+        }
+        .price-badge {
+            display:inline-flex; align-items:center; gap:6px;
+            background:rgba(4,212,190,0.09); border:1px solid rgba(4,212,190,0.2);
+            border-radius:20px; padding:5px 12px; margin-bottom:20px;
+        }
+        .pb-txt { font-size:11px; font-weight:600; color:var(--teal); letter-spacing:0.06em; text-transform:uppercase; }
+        .price-title {
+            font-family:'Syne',sans-serif; font-size:21px; font-weight:800;
+            color:var(--white); margin-bottom:4px;
+        }
+        .price-desc { font-size:14px; color:var(--text); margin-bottom:24px; font-weight:300; }
+        .price-amt { display:flex; align-items:flex-end; gap:5px; }
+        .p-cur { font-family:'Syne',sans-serif; font-size:24px; font-weight:700; color:var(--teal); line-height:1.3; }
+        .p-num { font-family:'Syne',sans-serif; font-size:58px; font-weight:700; color:var(--white); line-height:1; letter-spacing:-0.03em; }
+        .p-per { font-size:13px; color:var(--text); margin-bottom:10px; line-height:1.4; }
+        .p-note { margin-top:8px; font-size:12px; color:rgba(122,147,170,0.6); }
+
+        .price-feats { padding:28px 36px; }
+        .pf-row { display:flex; align-items:center; gap:12px; padding:9px 0; }
+        .pf-ck {
+            width:20px; height:20px; flex-shrink:0;
+            background:rgba(4,212,190,0.11); border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+        }
+        .pf-txt { font-size:14px; color:var(--text-light); }
+
+        .price-cta { padding:20px 36px 36px; }
+
+        /* ══════════════════════ TESTIMONIALS ══════════════════════ */
+        .testi-sec { background:var(--ink); }
+
+        .testi-grid {
+            display:grid; grid-template-columns:repeat(3,1fr);
+            gap:20px; margin-top:60px;
+        }
+        .testi-card {
+            background:var(--card); border:1px solid var(--border);
+            border-radius:16px; padding:28px;
+            transition:border-color 0.25s;
+        }
+        .testi-card:hover { border-color:rgba(4,212,190,0.14); }
+        .stars { display:flex; gap:3px; margin-bottom:18px; }
+        .star { color:#FFB800; font-size:14px; }
+        .testi-q {
+            font-size:15px; line-height:1.72; color:var(--text-light);
+            font-style:italic; font-weight:300; margin-bottom:22px;
+        }
+        .testi-who { display:flex; align-items:center; gap:12px; }
+        .testi-av {
+            width:40px; height:40px; border-radius:50%; flex-shrink:0;
+            background:linear-gradient(135deg, rgba(4,212,190,0.3), rgba(10,58,140,0.5));
+            display:flex; align-items:center; justify-content:center;
+            font-family:'Syne',sans-serif; font-size:13px; font-weight:800; color:var(--white);
+        }
+        .testi-name { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; color:var(--white); }
+        .testi-role { font-size:12px; color:var(--text); margin-top:2px; }
+
+        /* ══════════════════════ CTA ══════════════════════ */
+        .cta-sec {
+            padding:104px 56px;
+            background:var(--navy);
+            position:relative; overflow:hidden;
+        }
+        .cta-glow {
+            position:absolute; inset:0;
+            background:radial-gradient(ellipse 800px 400px at 50% 50%, rgba(4,212,190,0.07) 0%, transparent 70%);
+            pointer-events:none;
+        }
+        .cta-inner {
+            position:relative; z-index:2;
+            text-align:center; max-width:580px; margin:0 auto;
+        }
+        .cta-inner .sec-label { justify-content:center; }
+
+        /* ══════════════════════ FOOTER ══════════════════════ */
+        footer {
+            background:var(--ink);
+            border-top:1px solid var(--border);
+            padding:52px 40px 32px;
+        }
+        .ft-inner { max-width:1080px; margin:0 auto; }
+        .ft-top {
+            display:grid; grid-template-columns:2.2fr 1fr 1fr 1fr;
+            gap:48px; padding-bottom:44px;
+            border-bottom:1px solid var(--border);
+        }
+        .ft-brand p {
+            font-size:14px; line-height:1.65; color:var(--text);
+            margin-top:14px; max-width:250px; font-weight:300;
+        }
+        .ft-col-ttl {
+            font-family:'Syne',sans-serif; font-size:11px; font-weight:700;
+            color:var(--white); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:20px;
+        }
+        .ft-links { list-style:none; display:flex; flex-direction:column; gap:12px; }
+        .ft-links a {
+            font-size:14px; color:var(--text); text-decoration:none;
+            transition:color 0.2s; font-weight:300;
+        }
+        .ft-links a:hover { color:var(--white); }
+        .ft-bottom {
+            padding-top:26px;
+            display:flex; align-items:center; justify-content:space-between;
+        }
+        .ft-copy { font-size:13px; color:rgba(122,147,170,0.45); }
+        .ft-socials { display:flex; gap:10px; }
+        .social-a {
+            width:36px; height:36px; border:1px solid var(--border); border-radius:8px;
+            display:flex; align-items:center; justify-content:center;
+            color:var(--text); text-decoration:none;
+            transition:border-color 0.2s, color 0.2s, background 0.2s;
+        }
+        .social-a:hover {
+            border-color:rgba(4,212,190,0.3); color:var(--teal);
+            background:rgba(4,212,190,0.05);
+        }
+
+        /* ══════════════════════ ANIMATIONS ══════════════════════ */
+        @keyframes fadeUp {
+            from{opacity:0;transform:translateY(22px)}
+            to{opacity:1;transform:none}
+        }
+        .au { animation:fadeUp 0.7s cubic-bezier(0.22,1,0.36,1) both; }
+        .d1{animation-delay:0.08s} .d2{animation-delay:0.17s} .d3{animation-delay:0.26s}
+        .d4{animation-delay:0.35s} .d5{animation-delay:0.44s}
+
+        /* scroll-reveal */
+        .will-animate { opacity:0; transform:translateY(20px); transition:opacity 0.6s cubic-bezier(0.22,1,0.36,1), transform 0.6s cubic-bezier(0.22,1,0.36,1); }
+        .will-animate.visible { opacity:1; transform:none; }
+        .will-animate[data-delay="0"]{transition-delay:0s}
+        .will-animate[data-delay="1"]{transition-delay:0.07s}
+        .will-animate[data-delay="2"]{transition-delay:0.14s}
+        .will-animate[data-delay="3"]{transition-delay:0.21s}
+        .will-animate[data-delay="4"]{transition-delay:0.28s}
+        .will-animate[data-delay="5"]{transition-delay:0.35s}
+        .will-animate[data-delay="6"]{transition-delay:0.07s}
+        .will-animate[data-delay="7"]{transition-delay:0.14s}
+        .will-animate[data-delay="8"]{transition-delay:0.21s}
+        .will-animate[data-delay="9"]{transition-delay:0.28s}
+        .will-animate[data-delay="10"]{transition-delay:0.35s}
+        .will-animate[data-delay="11"]{transition-delay:0.07s}
+        .will-animate[data-delay="12"]{transition-delay:0.14s}
+        .will-animate[data-delay="13"]{transition-delay:0.21s}
+        .will-animate[data-delay="14"]{transition-delay:0.28s}
+        .will-animate[data-delay="15"]{transition-delay:0.07s}
+        .will-animate[data-delay="16"]{transition-delay:0.14s}
+        .will-animate[data-delay="17"]{transition-delay:0.21s}
+
+        /* ══════════════════════ RESPONSIVE ══════════════════════ */
+        @media(max-width:960px){
+            .site-nav { padding:0 24px; }
+            .nav-links { display:none; flex-direction:column; position:absolute; top:68px; left:0; right:0; background:rgba(6,13,26,0.97); padding:20px 24px; border-bottom:1px solid var(--border); backdrop-filter:blur(20px); gap:20px; }
+            .nav-links.open { display:flex; }
+            .hamburger { display:block; }
+            .hero { padding:96px 24px 64px; }
+            .hero-inner { grid-template-columns:1fr; gap:0; }
+            .pos-wrap { display:none; }
+            .section { padding:64px 24px; }
+            .stats-bar { padding:28px 24px; }
+            .stats-inner { grid-template-columns:repeat(2,1fr); gap:20px; }
+            .feat-grid { grid-template-columns:1fr; }
+            .steps-grid { grid-template-columns:1fr; gap:36px; }
+            .steps-grid::before { display:none; }
+            .int-grid { grid-template-columns:1fr; }
+            .testi-grid { grid-template-columns:1fr; }
+            .ft-top { grid-template-columns:1fr 1fr; }
+            .ft-bottom { flex-direction:column; gap:16px; text-align:center; }
+            .cta-sec { padding:64px 24px; }
+            footer { padding:40px 24px 28px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ════════════════ NAV ════════════════ -->
+<nav class="site-nav">
+    <a href="#" class="nav-logo">
+        <img src="brand_assets/logo-blue.svg" alt="OblakKoder" class="logo-img">
+    </a>
+    <ul class="nav-links" id="navlinks">
+        <li><a href="features.html">Features</a></li>
+        <li><a href="#how">How It Works</a></li>
+        <li><a href="#integrations">Integrations</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#contact" class="nav-cta">Get Started</a></li>
+    </ul>
+    <button class="hamburger" id="ham" aria-label="Menu">
+        <svg width="24" height="17" viewBox="0 0 24 17" fill="none">
+            <rect width="24" height="2" rx="1" fill="rgba(235,243,255,0.8)"/>
+            <rect y="7.5" width="17" height="2" rx="1" fill="rgba(235,243,255,0.8)"/>
+            <rect y="15" width="24" height="2" rx="1" fill="rgba(235,243,255,0.8)"/>
+        </svg>
+    </button>
+</nav>
+
+<!-- ════════════════ HERO ════════════════ -->
+<section class="hero">
+    <div class="blob blob-a"></div>
+    <div class="blob blob-b"></div>
+    <div class="blob blob-c"></div>
+    <div class="hero-inner">
+
+        <!-- Copy -->
+        <div>
+            <div class="hero-badge au">
+                <div class="badge-pulse"></div>
+                <span class="badge-txt">Cloud-Native POS Platform</span>
+            </div>
+            <h1 class="hero-h1 au d1">
+                The POS that<br><span class="accent">always works.</span>
+            </h1>
+            <p class="hero-p au d2">
+                OblakKoder empowers retailers, restaurants, and SMEs with lightning-fast invoicing, real-time inventory, and seamless integrations — all in one flat monthly price.
+            </p>
+            <div class="hero-btns au d3">
+                <a href="#pricing" class="btn-primary">
+                    Start Free Trial
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+                <a href="features.html" class="btn-ghost">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M6.5 5.5L10 8l-3.5 2.5" fill="currentColor"/></svg>
+                    See Features
+                </a>
+            </div>
+            <div class="hero-price-row au d4">
+                <div class="price-big">€19.99</div>
+                <div class="price-meta">
+                    per terminal / month<br>
+                    <span>All features included · Cancel anytime</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- POS Mockup -->
+        <div class="pos-wrap au d3">
+            <div class="pos-screen">
+                <div class="pos-hdr">
+                    <div class="pos-hdr-l">
+                        <div class="pos-chip">OK</div>
+                        <span class="pos-name">OblakKoder POS</span>
+                    </div>
+                    <div class="pos-live">
+                        <div class="live-dot"></div>
+                        <span class="live-txt">Live</span>
+                    </div>
+                </div>
+                <div class="pos-items">
+                    <div class="pos-row">
+                        <span class="pos-item-n">Organic Milk 1L</span>
+                        <span class="pos-item-q">×2</span>
+                        <span class="pos-item-p">€3.40</span>
+                    </div>
+                    <div class="pos-row">
+                        <span class="pos-item-n">Artisan Bread</span>
+                        <span class="pos-item-q">×1</span>
+                        <span class="pos-item-p">€2.80</span>
+                    </div>
+                    <div class="pos-row">
+                        <span class="pos-item-n">Greek Yogurt 500g</span>
+                        <span class="pos-item-q">×3</span>
+                        <span class="pos-item-p">€6.30</span>
+                    </div>
+                    <div class="pos-row">
+                        <span class="pos-item-n">Fresh Orange Juice</span>
+                        <span class="pos-item-q">×1</span>
+                        <span class="pos-item-p">€3.50</span>
+                    </div>
+                </div>
+                <div class="pos-div"></div>
+                <div class="pos-total-row">
+                    <span class="pos-total-lbl">Total Due</span>
+                    <span class="pos-total-amt">€16.00</span>
+                </div>
+                <button class="pos-pay-btn">
+                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="1" y="4" width="13" height="9" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M1 7h13" stroke="currentColor" stroke-width="1.5"/></svg>
+                    Process Payment
+                </button>
+                <div class="pos-methods">
+                    <div class="pay-m on">Card</div>
+                    <div class="pay-m">Cash</div>
+                    <div class="pay-m">QR Pay</div>
+                </div>
+            </div>
+            <!-- badge: invoice speed -->
+            <div class="fbadge fbadge-1">
+                <div class="fb-ico g">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="#00CD78" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div>
+                    <div class="fb-val">&lt; 5s</div>
+                    <div class="fb-lbl">Invoice issued</div>
+                </div>
+            </div>
+            <!-- badge: uptime -->
+            <div class="fbadge fbadge-2">
+                <div class="fb-ico b">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="#408CFF" stroke-width="1.8"/><path d="M9 5v4l3 2" stroke="#408CFF" stroke-width="1.8" stroke-linecap="round"/></svg>
+                </div>
+                <div>
+                    <div class="fb-val">99.9%</div>
+                    <div class="fb-lbl">Uptime</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ════════════════ STATS ════════════════ -->
+<div class="stats-bar">
+    <div class="stats-inner">
+        <div class="stat-item">
+            <div class="stat-val">500<em>+</em></div>
+            <div class="stat-lbl">Active terminals</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-val">4.8<em>s</em></div>
+            <div class="stat-lbl">Avg. invoice speed</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-val">99.9<em>%</em></div>
+            <div class="stat-lbl">Platform uptime</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-val">24<em>/7</em></div>
+            <div class="stat-lbl">Expert support</div>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════ FEATURES ════════════════ -->
+<section class="section features-sec" id="features">
+    <div class="sec-inner">
+        <div class="sec-label">Platform Features</div>
+        <h2 class="sec-h2">Everything to run<br>your store smarter.</h2>
+        <p class="sec-sub">One platform with all the tools modern retailers need. No add-ons, no hidden fees.</p>
+
+        <div class="feat-grid">
+            <div class="feat-card">
+                <div class="feat-ico">
+                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 6h14M4 10h10M4 14h6" stroke="#04D4BE" stroke-width="2" stroke-linecap="round"/><path d="M15 14l2.5 2.5L22 11" stroke="#04D4BE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <h3 class="feat-h3">Fast Fiscal Invoicing</h3>
+                <p class="feat-p">Issue compliant fiscal invoices in under 5 seconds. Fully integrated with the Ministry of Finance fiscal system.</p>
+            </div>
+            <div class="feat-card">
+                <div class="feat-ico">
+                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="12" width="5" height="8" rx="1" stroke="#04D4BE" stroke-width="1.8"/><rect x="8.5" y="7" width="5" height="13" rx="1" stroke="#04D4BE" stroke-width="1.8"/><rect x="15" y="2" width="5" height="18" rx="1" stroke="#04D4BE" stroke-width="1.8"/></svg>
+                </div>
+                <h3 class="feat-h3">Real-Time Inventory</h3>
+                <p class="feat-p">Track stock levels as they change. Automatic low-stock alerts before you run out of your best sellers.</p>
+            </div>
+            <div class="feat-card">
+                <div class="feat-ico">
+                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M5 2h8l5 5v13a1 1 0 01-1 1H5a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="#04D4BE" stroke-width="1.8"/><path d="M13 2v6h5M7 11h8M7 15h5" stroke="#04D4BE" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </div>
+                <h3 class="feat-h3">eFaktura Integration</h3>
+                <p class="feat-p">Automatically issue electronic invoices to the SEF system. Zero manual effort, full legal compliance.</p>
+            </div>
+            <div class="feat-card">
+                <div class="feat-ico">
+                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="5" cy="17" r="2.5" stroke="#04D4BE" stroke-width="1.8"/><circle cx="17" cy="17" r="2.5" stroke="#04D4BE" stroke-width="1.8"/><path d="M3 17V11l3-5h8l4 5v6" stroke="#04D4BE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <h3 class="feat-h3">Wolt Delivery</h3>
+                <p class="feat-p">One-click Wolt integration. Manage delivery orders directly inside your POS — no separate tablet needed.</p>
+            </div>
+            <div class="feat-card">
+                <div class="feat-ico">
+                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 3h8l10 10a2 2 0 010 2.83l-4.17 4.17a2 2 0 01-2.83 0L4 10V3z" stroke="#04D4BE" stroke-width="1.8" stroke-linejoin="round"/><circle cx="8.5" cy="8.5" r="1.5" fill="#04D4BE"/></svg>
+                </div>
+                <h3 class="feat-h3">Price Label Printing</h3>
+                <p class="feat-p">Generate and print shelf labels directly from inventory. Keep prices accurate and your store organized.</p>
+            </div>
+            <div class="feat-card">
+                <div class="feat-ico">
+                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M2 11a9 9 0 1018 0 9 9 0 00-18 0z" stroke="#04D4BE" stroke-width="1.8"/><path d="M11 7v4l3 3" stroke="#04D4BE" stroke-width="1.8" stroke-linecap="round"/></svg>
+                </div>
+                <h3 class="feat-h3">Daily Reconciliation</h3>
+                <p class="feat-p">Automated end-of-day reports, cash reconciliation, and stock verification in one closing workflow.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ════════════════ HOW IT WORKS ════════════════ -->
+<section class="section how-sec" id="how">
+    <div class="sec-inner">
+        <div class="sec-label">Getting Started</div>
+        <h2 class="sec-h2">Up and running<br>on day one.</h2>
+        <p class="sec-sub">Our onboarding team handles setup, data import, and training — so you never lose a day of sales.</p>
+
+        <div class="steps-grid">
+            <div class="step">
+                <div class="step-num">01</div>
+                <div class="step-ico">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" stroke="#04D4BE" stroke-width="1.8"/><rect x="13" y="3" width="8" height="8" rx="2" stroke="#04D4BE" stroke-width="1.8"/><rect x="3" y="13" width="8" height="8" rx="2" stroke="#04D4BE" stroke-width="1.8"/><path d="M17 13v8M13 17h8" stroke="#04D4BE" stroke-width="1.8" stroke-linecap="round"/></svg>
+                </div>
+                <h3 class="step-h3">Sign Up & Configure</h3>
+                <p class="step-p">Create your account, set up your store, and import your product catalog. A guided wizard gets you done in under 30 minutes.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">02</div>
+                <div class="step-ico">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5z" stroke="#04D4BE" stroke-width="1.8" stroke-linejoin="round"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="#04D4BE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <h3 class="step-h3">Connect Integrations</h3>
+                <p class="step-p">Link your fiscal system, eFaktura, and Wolt with one click. All regulatory compliance is handled automatically.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">03</div>
+                <div class="step-ico">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#04D4BE" stroke-width="1.8"/><path d="M9 12l2.5 2.5L15 9" stroke="#04D4BE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <h3 class="step-h3">Start Selling</h3>
+                <p class="step-p">Your POS is live. Process transactions, track inventory, and generate reports — from the very first day.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ════════════════ INTEGRATIONS ════════════════ -->
+<section class="section int-sec" id="integrations">
+    <div class="sec-inner">
+        <div class="sec-label">Integrations</div>
+        <h2 class="sec-h2">Connects with the<br>tools you rely on.</h2>
+        <p class="sec-sub">Pre-built integrations with Serbia's leading fiscal and logistics platforms, with more coming soon.</p>
+
+        <div class="int-grid">
+            <div class="int-card">
+                <div class="int-logo" style="background:rgba(0,200,90,0.12);">
+                    <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+                        <circle cx="17" cy="17" r="14" fill="rgba(0,200,90,0.14)"/>
+                        <text x="17" y="22" text-anchor="middle" font-family="Syne,sans-serif" font-weight="800" font-size="14" fill="#00C85A">W</text>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="int-h3">Wolt Delivery</h3>
+                    <p class="int-p">Receive and manage Wolt delivery orders directly inside your POS. Accept, track, and fulfill without switching apps or devices.</p>
+                    <span class="int-tag">Free with POS license</span>
+                </div>
+            </div>
+            <div class="int-card">
+                <div class="int-logo" style="background:rgba(60,140,255,0.12);">
+                    <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+                        <circle cx="17" cy="17" r="14" fill="rgba(60,140,255,0.1)"/>
+                        <path d="M11 17h12M17 11v12" stroke="#3C8CFF" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="int-h3">eFaktura / SEF</h3>
+                    <p class="int-p">Full two-way integration with the Ministry of Finance electronic invoicing system. Issue B2B e-invoices automatically with zero manual input.</p>
+                    <span class="int-tag">Fully compliant</span>
+                </div>
+            </div>
+            <div class="int-card">
+                <div class="int-logo" style="background:rgba(255,112,67,0.12);">
+                    <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+                        <circle cx="17" cy="17" r="14" fill="rgba(255,112,67,0.1)"/>
+                        <rect x="11" y="13" width="12" height="10" rx="2" stroke="#FF7043" stroke-width="2"/>
+                        <path d="M14 13v-2a3 3 0 016 0v2" stroke="#FF7043" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="int-h3">POS Hardware</h3>
+                    <p class="int-p">Works with all certified fiscal receipt printers and barcode scanners. No proprietary hardware lock-in — use what you have.</p>
+                    <span class="int-tag">Hardware agnostic</span>
+                </div>
+            </div>
+            <div class="int-card">
+                <div class="int-logo" style="background:rgba(4,212,190,0.1);">
+                    <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+                        <circle cx="17" cy="17" r="14" fill="rgba(4,212,190,0.08)"/>
+                        <path d="M11 23V11l6 6 6-6v12" stroke="#04D4BE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="int-h3">Cloud Sync & Backup</h3>
+                    <p class="int-p">Every transaction synced to the cloud in real time. Access dashboards and reports from any device, anywhere.</p>
+                    <span class="int-tag">Real-time sync</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ════════════════ PRICING ════════════════ -->
+<section class="section price-sec" id="pricing">
+    <div class="sec-inner" style="text-align:center;">
+        <div class="sec-label" style="justify-content:center;">Simple Pricing</div>
+        <h2 class="sec-h2">One plan.<br>All features. No surprises.</h2>
+        <p class="sec-sub" style="margin:0 auto;">Every feature, every integration, every future update — included in one flat monthly price per terminal.</p>
+
+        <div class="price-card">
+            <div class="price-top">
+                <div class="price-badge">
+                    <div class="badge-pulse"></div>
+                    <span class="pb-txt">Professional</span>
+                </div>
+                <div class="price-title">OblakKoder POS</div>
+                <div class="price-desc">Everything you need to run a modern retail or hospitality business.</div>
+                <div class="price-amt">
+                    <span class="p-cur">€</span>
+                    <span class="p-num">19.99</span>
+                    <span class="p-per">/ month<br>per terminal</span>
+                </div>
+                <p class="p-note">+ VAT &nbsp;·&nbsp; Cancel anytime &nbsp;·&nbsp; Free Wolt integration included</p>
+            </div>
+            <div class="price-feats">
+                <div class="pf-row"><div class="pf-ck"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="#04D4BE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="pf-txt">Fast fiscal invoicing (under 5 seconds)</span></div>
+                <div class="pf-row"><div class="pf-ck"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="#04D4BE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="pf-txt">Real-time inventory management</span></div>
+                <div class="pf-row"><div class="pf-ck"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="#04D4BE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="pf-txt">Wolt delivery integration (free)</span></div>
+                <div class="pf-row"><div class="pf-ck"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="#04D4BE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="pf-txt">eFaktura / SEF integration</span></div>
+                <div class="pf-row"><div class="pf-ck"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="#04D4BE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="pf-txt">Price label printing</span></div>
+                <div class="pf-row"><div class="pf-ck"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="#04D4BE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="pf-txt">Customer &amp; supplier receivables</span></div>
+                <div class="pf-row"><div class="pf-ck"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="#04D4BE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="pf-txt">Daily reconciliation &amp; stock verification</span></div>
+                <div class="pf-row"><div class="pf-ck"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="#04D4BE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="pf-txt">24/7 expert support</span></div>
+            </div>
+            <div class="price-cta">
+                <a href="#" class="btn-primary" style="width:100%;justify-content:center;font-size:15px;padding:16px 28px;">
+                    Start Free Trial
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ════════════════ TESTIMONIALS ════════════════ -->
+<section class="section testi-sec" id="testimonials">
+    <div class="sec-inner">
+        <div class="sec-label">Customer Stories</div>
+        <h2 class="sec-h2">Trusted by shops<br>across the region.</h2>
+
+        <div class="testi-grid">
+            <div class="testi-card">
+                <div class="stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div>
+                <p class="testi-q">"OblakKoder completely changed how we run our store. Invoices that used to take a minute now take seconds. Worth every cent."</p>
+                <div class="testi-who">
+                    <div class="testi-av">MP</div>
+                    <div>
+                        <div class="testi-name">Marko Petrović</div>
+                        <div class="testi-role">Owner, Mini Market Petrović</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testi-card">
+                <div class="stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div>
+                <p class="testi-q">"The Wolt integration alone saved us from needing an extra tablet. Everything flows through one screen — setup took us less than a day."</p>
+                <div class="testi-who">
+                    <div class="testi-av">AJ</div>
+                    <div>
+                        <div class="testi-name">Ana Jovanović</div>
+                        <div class="testi-role">Manager, Kafilerija Centar</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testi-card">
+                <div class="stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div>
+                <p class="testi-q">"We run three locations and managing inventory was a nightmare. With OblakKoder we see everything in real time from one dashboard."</p>
+                <div class="testi-who">
+                    <div class="testi-av">SN</div>
+                    <div>
+                        <div class="testi-name">Stefan Nikolić</div>
+                        <div class="testi-role">Director, Mesnara Nikolić</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ════════════════ CTA ════════════════ -->
+<section class="cta-sec" id="contact">
+    <div class="cta-glow"></div>
+    <div class="cta-inner">
+        <div class="sec-label">Get Started Today</div>
+        <h2 class="sec-h2" style="margin-bottom:14px;">Ready to modernize<br>your point of sale?</h2>
+        <p style="font-size:17px;line-height:1.7;color:var(--text);margin-bottom:40px;font-weight:300;">Join hundreds of retailers already saving time and staying compliant with OblakKoder POS.</p>
+        <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+            <a href="#" class="btn-primary" style="font-size:15px;padding:16px 32px;">
+                Start Free Trial
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <a href="#" class="btn-ghost" style="font-size:15px;padding:16px 28px;">Book a Demo</a>
+        </div>
+        <p style="margin-top:18px;font-size:13px;color:rgba(122,147,170,0.5);">No credit card required &nbsp;·&nbsp; Setup in under 30 minutes</p>
+    </div>
+</section>
+
+<!-- ════════════════ FOOTER ════════════════ -->
+<footer>
+    <div class="ft-inner">
+        <div class="ft-top">
+            <div class="ft-brand">
+                <a href="#" class="nav-logo">
+                    <img src="brand_assets/logo-blue.svg" alt="OblakKoder" class="logo-img">
+                </a>
+                <p>Cloud-native POS software for modern retail and hospitality. Built for speed, compliance, and growth.</p>
+            </div>
+            <div>
+                <div class="ft-col-ttl">Product</div>
+                <ul class="ft-links">
+                    <li><a href="features.html">Features</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="#integrations">Integrations</a></li>
+                    <li><a href="#contact">Demo</a></li>
+                </ul>
+            </div>
+            <div>
+                <div class="ft-col-ttl">Company</div>
+                <ul class="ft-links">
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Partner Program</a></li>
+                    <li><a href="#">Support</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+            <div>
+                <div class="ft-col-ttl">Legal</div>
+                <ul class="ft-links">
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">GDPR</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="ft-bottom">
+            <span class="ft-copy">© 2025 Oblak Koder d.o.o. · All rights reserved.</span>
+            <div class="ft-socials">
+                <a href="#" class="social-a" aria-label="LinkedIn">
+                    <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+                </a>
+                <a href="#" class="social-a" aria-label="Instagram">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                </a>
+                <a href="#" class="social-a" aria-label="Facebook">
+                    <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // mobile nav toggle
+    const ham = document.getElementById('ham');
+    const nav = document.getElementById('navlinks');
+    ham.addEventListener('click', () => nav.classList.toggle('open'));
+
+    // scroll-triggered fade-up for cards
+    const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) {
+                e.target.classList.add('visible');
+                io.unobserve(e.target);
+            }
+        });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.feat-card, .step, .int-card, .testi-card').forEach((el, i) => {
+        el.dataset.delay = i % 6;
+        el.classList.add('will-animate');
+        io.observe(el);
+    });
+
+    // ensure all elements are visible after a short delay (fallback for bots/screenshots)
+    setTimeout(() => {
+        document.querySelectorAll('.will-animate').forEach(el => el.classList.add('visible'));
+    }, 200);
+
+    // nav scroll tint
+    window.addEventListener('scroll', () => {
+        document.querySelector('.site-nav').style.background =
+            window.scrollY > 40 ? 'rgba(6,13,26,0.92)' : 'rgba(6,13,26,0.72)';
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Features — OblakKoder POS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --ink:        #060D1A;
+            --navy:       #0A1628;
+            --card:       #0E1C33;
+            --card2:      #111E36;
+            --border:     rgba(255,255,255,0.07);
+            --teal:       #04D4BE;
+            --teal-dim:   rgba(4,212,190,0.08);
+            --teal-glow:  rgba(4,212,190,0.22);
+            --text:       #7A93AA;
+            --text-light: #C2D6E8;
+            --white:      #EBF3FF;
+        }
+
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+
+        body {
+            font-family:'DM Sans', sans-serif;
+            background:var(--ink);
+            color:var(--text);
+            overflow-x:hidden;
+        }
+
+        h1,h2,h3,h4,.syne { font-family:'Syne',sans-serif; }
+
+        body::after {
+            content:'';
+            position:fixed; inset:0;
+            background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+            background-size:180px;
+            pointer-events:none; z-index:9998;
+        }
+
+        /* ══════════════ NAV ══════════════ */
+        .site-nav {
+            position:fixed; top:0; left:0; right:0; z-index:200;
+            display:flex; align-items:center; justify-content:space-between;
+            padding:0 40px; height:68px;
+            background:rgba(6,13,26,0.72);
+            backdrop-filter:blur(20px);
+            border-bottom:1px solid var(--border);
+            transition:background 0.3s;
+        }
+        .nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+        .logo-img { height:26px; width:auto; filter:brightness(0) invert(1); display:block; }
+        .nav-links { display:flex; align-items:center; gap:32px; list-style:none; }
+        .nav-links a { color:var(--text); text-decoration:none; font-size:14px; font-weight:400; transition:color 0.2s; }
+        .nav-links a:hover { color:var(--white); }
+        .nav-links a.active { color:var(--white); }
+        .nav-cta {
+            background:var(--teal) !important; color:var(--ink) !important;
+            padding:9px 20px !important; border-radius:7px;
+            font-weight:600 !important; font-size:13px !important;
+            transition:background 0.2s, transform 0.15s, box-shadow 0.2s !important;
+        }
+        .nav-cta:hover { background:#08ECD4 !important; transform:translateY(-1px); box-shadow:0 6px 20px var(--teal-glow) !important; }
+        .hamburger { display:none; background:none; border:none; cursor:pointer; padding:4px; }
+
+        /* ══════════════ HERO ══════════════ */
+        .pg-hero {
+            position:relative;
+            padding:140px 40px 96px;
+            overflow:hidden;
+            background:var(--navy);
+        }
+        .pg-hero::before {
+            content:'';
+            position:absolute; inset:0;
+            background-image:radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size:36px 36px;
+            pointer-events:none; z-index:0;
+        }
+        .hero-glow {
+            position:absolute; border-radius:50%; pointer-events:none;
+            width:800px; height:400px;
+            background:radial-gradient(ellipse, rgba(4,212,190,0.1) 0%, transparent 65%);
+            top:-80px; left:50%; transform:translateX(-50%);
+        }
+        .pg-hero-inner {
+            position:relative; z-index:2;
+            max-width:780px; margin:0 auto;
+            text-align:center;
+        }
+        .pg-badge {
+            display:inline-flex; align-items:center; gap:8px;
+            background:rgba(4,212,190,0.07); border:1px solid rgba(4,212,190,0.18);
+            border-radius:100px; padding:5px 14px 5px 8px;
+            margin-bottom:28px;
+        }
+        .badge-dot { width:6px; height:6px; background:var(--teal); border-radius:50%; animation:pulse 2.2s ease-in-out infinite; }
+        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.45;transform:scale(0.75)} }
+        .badge-txt { font-size:11.5px; font-weight:500; color:var(--teal); letter-spacing:0.05em; }
+
+        .pg-h1 {
+            font-family:'Syne',sans-serif;
+            font-size:clamp(36px,4.4vw,60px);
+            font-weight:700; line-height:1.08; letter-spacing:-0.025em;
+            color:var(--white); margin-bottom:20px;
+        }
+        .pg-h1 .accent { color:var(--teal); }
+        .pg-sub {
+            font-size:17px; font-weight:300; line-height:1.72;
+            color:var(--text); max-width:520px; margin:0 auto 36px;
+        }
+        .hero-btns { display:flex; align-items:center; gap:14px; justify-content:center; flex-wrap:wrap; }
+
+        /* ══════════════ BUTTONS ══════════════ */
+        .btn-primary {
+            display:inline-flex; align-items:center; gap:8px;
+            background:var(--teal); color:var(--ink);
+            font-family:'Syne',sans-serif; font-weight:700; font-size:14px;
+            padding:14px 28px; border-radius:8px;
+            text-decoration:none; border:none; cursor:pointer;
+            transition:background 0.2s, transform 0.15s, box-shadow 0.2s;
+        }
+        .btn-primary:hover { background:#08ECD4; transform:translateY(-2px); box-shadow:0 14px 36px var(--teal-glow); }
+        .btn-primary:active { transform:translateY(0); }
+        .btn-ghost {
+            display:inline-flex; align-items:center; gap:8px;
+            background:transparent; color:var(--text-light);
+            font-size:14px; font-weight:400;
+            padding:14px 22px; border-radius:8px;
+            text-decoration:none; border:1px solid var(--border); cursor:pointer;
+            transition:border-color 0.2s, color 0.2s, background 0.2s;
+        }
+        .btn-ghost:hover { border-color:rgba(255,255,255,0.14); color:var(--white); background:rgba(255,255,255,0.035); }
+
+        /* ══════════════ FEATURE PILLS ══════════════ */
+        .pills-sec {
+            padding:64px 40px 0;
+            background:var(--navy);
+            border-bottom:1px solid var(--border);
+        }
+        .pills-inner { max-width:1080px; margin:0 auto; }
+        .pills-label {
+            font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase;
+            color:var(--teal); margin-bottom:28px;
+            display:flex; align-items:center; gap:10px;
+        }
+        .pills-label::before { content:''; width:18px; height:1.5px; background:var(--teal); border-radius:2px; }
+        .pills-grid {
+            display:grid; grid-template-columns:repeat(3,1fr);
+            gap:2px; border:1px solid var(--border);
+            border-radius:16px; overflow:hidden;
+            margin-bottom:0;
+        }
+        .pill-item {
+            display:flex; align-items:flex-start; gap:14px;
+            padding:22px 24px;
+            background:var(--card);
+            text-decoration:none;
+            transition:background 0.22s;
+            cursor:pointer;
+            position:relative;
+        }
+        .pill-item::after {
+            content:''; position:absolute; bottom:0; left:0; right:0; height:2px;
+            background:var(--teal); transform:scaleX(0); transform-origin:left;
+            transition:transform 0.25s cubic-bezier(0.22,1,0.36,1);
+        }
+        .pill-item:hover { background:var(--card2); }
+        .pill-item:hover::after { transform:scaleX(1); }
+        .pill-num {
+            font-family:'Syne',sans-serif; font-size:10px; font-weight:700;
+            color:rgba(4,212,190,0.4); letter-spacing:0.06em;
+            min-width:22px; padding-top:3px;
+        }
+        .pill-ico {
+            width:36px; height:36px; flex-shrink:0; border-radius:9px;
+            background:var(--teal-dim); border:1px solid rgba(4,212,190,0.12);
+            display:flex; align-items:center; justify-content:center;
+            transition:background 0.22s;
+        }
+        .pill-item:hover .pill-ico { background:rgba(4,212,190,0.14); }
+        .pill-text { flex:1; }
+        .pill-name {
+            font-family:'Syne',sans-serif; font-size:14px; font-weight:700;
+            color:var(--white); margin-bottom:5px; letter-spacing:-0.01em;
+        }
+        .pill-desc { font-size:12.5px; line-height:1.55; color:var(--text); font-weight:300; }
+        .pill-arrow {
+            color:rgba(4,212,190,0.3); font-size:16px; padding-top:2px;
+            transition:color 0.2s, transform 0.2s;
+        }
+        .pill-item:hover .pill-arrow { color:var(--teal); transform:translateX(3px); }
+
+        /* ══════════════ DEEP-DIVE SECTIONS ══════════════ */
+        .section { padding:96px 40px; }
+        .sec-inner { max-width:1080px; margin:0 auto; }
+        .sec-label {
+            display:inline-flex; align-items:center; gap:10px;
+            font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase;
+            color:var(--teal); margin-bottom:14px;
+        }
+        .sec-label::before { content:''; width:18px; height:1.5px; background:var(--teal); border-radius:2px; }
+
+        .divider-sec {
+            padding:60px 40px 0;
+        }
+        .divider-inner {
+            max-width:1080px; margin:0 auto;
+            border-top:1px solid var(--border);
+            padding-top:60px;
+            display:flex; flex-direction:column; align-items:flex-start;
+        }
+        .divider-h2 {
+            font-family:'Syne',sans-serif;
+            font-size:clamp(28px,3.2vw,46px);
+            font-weight:700; line-height:1.12; letter-spacing:-0.02em;
+            color:var(--white); margin-bottom:12px;
+        }
+        .divider-sub {
+            font-size:16px; line-height:1.7; color:var(--text);
+            max-width:560px; font-weight:300;
+        }
+
+        /* alternating feature rows */
+        .feat-row {
+            padding:80px 40px;
+            position:relative;
+        }
+        .feat-row:nth-child(even) { background:var(--navy); }
+        .feat-row:nth-child(odd) { background:var(--ink); }
+        .feat-row-inner {
+            max-width:1080px; margin:0 auto;
+            display:grid; grid-template-columns:1fr 1fr;
+            gap:72px; align-items:center;
+        }
+        .feat-row-inner.rev { direction:rtl; }
+        .feat-row-inner.rev > * { direction:ltr; }
+
+        .feat-tag {
+            display:inline-flex; align-items:center; gap:8px;
+            background:rgba(4,212,190,0.07); border:1px solid rgba(4,212,190,0.16);
+            border-radius:100px; padding:4px 12px;
+            font-size:11px; font-weight:600; color:var(--teal); letter-spacing:0.06em;
+            text-transform:uppercase; margin-bottom:18px;
+        }
+        .feat-num {
+            font-family:'Syne',sans-serif; font-size:11px; font-weight:700;
+            color:rgba(4,212,190,0.35); letter-spacing:0.1em; margin-bottom:10px;
+        }
+        .feat-h3 {
+            font-family:'Syne',sans-serif;
+            font-size:clamp(22px,2.2vw,32px);
+            font-weight:700; line-height:1.16; letter-spacing:-0.02em;
+            color:var(--white); margin-bottom:16px;
+        }
+        .feat-p {
+            font-size:15px; line-height:1.75; color:var(--text);
+            font-weight:300; margin-bottom:14px;
+        }
+        .feat-bullets { list-style:none; display:flex; flex-direction:column; gap:9px; margin-top:4px; }
+        .feat-bullets li {
+            display:flex; align-items:flex-start; gap:10px;
+            font-size:14px; line-height:1.55; color:var(--text-light); font-weight:300;
+        }
+        .feat-bullets li::before {
+            content:''; width:5px; height:5px; background:var(--teal); border-radius:50%;
+            flex-shrink:0; margin-top:7px;
+        }
+
+        /* ══ MOCKUP PANELS ══ */
+        .mockup-wrap {
+            position:relative;
+        }
+        .mockup-panel {
+            background:var(--card);
+            border:1px solid rgba(255,255,255,0.1);
+            border-radius:18px; padding:24px;
+            box-shadow:0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(4,212,190,0.1), 0 0 60px rgba(4,212,190,0.06);
+        }
+        .mockup-bar {
+            display:flex; align-items:center; gap:6px;
+            padding-bottom:16px; margin-bottom:16px;
+            border-bottom:1px solid rgba(255,255,255,0.08);
+        }
+        .mb-dot { width:8px; height:8px; border-radius:50%; }
+        .mb-title {
+            font-family:'Syne',sans-serif; font-size:11px; font-weight:700;
+            color:rgba(235,243,255,0.5); letter-spacing:0.06em; text-transform:uppercase;
+            margin-left:6px;
+        }
+        .mb-status {
+            margin-left:auto; display:flex; align-items:center; gap:5px;
+            background:rgba(4,212,190,0.1); padding:3px 9px; border-radius:20px;
+        }
+        .mb-live { width:5px; height:5px; background:var(--teal); border-radius:50%; animation:pulse 2s infinite; }
+        .mb-live-txt { font-size:9px; font-weight:700; color:var(--teal); letter-spacing:0.08em; }
+
+        /* ══ specific mockup types ══ */
+
+        /* Wolt */
+        .wolt-order {
+            background:rgba(0,200,90,0.06); border:1px solid rgba(0,200,90,0.15);
+            border-radius:10px; padding:14px 16px; margin-bottom:10px;
+        }
+        .wolt-hdr { display:flex; align-items:center; gap:9px; margin-bottom:10px; }
+        .wolt-badge {
+            background:rgba(0,200,90,0.15); border-radius:6px;
+            width:28px; height:28px; display:flex; align-items:center; justify-content:center;
+            font-family:'Syne',sans-serif; font-size:12px; font-weight:800; color:#00C85A;
+        }
+        .wolt-lbl { font-size:12px; font-weight:600; color:var(--white); }
+        .wolt-sub { font-size:10px; color:var(--text); }
+        .wolt-items { display:flex; flex-direction:column; gap:6px; }
+        .wolt-row { display:flex; justify-content:space-between; align-items:center; }
+        .wolt-name { font-size:12px; color:var(--text-light); }
+        .wolt-price { font-family:'Syne',sans-serif; font-size:12px; font-weight:700; color:var(--white); }
+        .wolt-arrow-row {
+            display:flex; align-items:center; justify-content:center; gap:14px;
+            padding:12px 0; color:rgba(4,212,190,0.5); font-size:12px;
+        }
+        .wolt-arrow-line { flex:1; height:1px; background:rgba(4,212,190,0.15); }
+        .wolt-arrow-txt { font-size:10px; color:var(--teal); font-weight:600; letter-spacing:0.06em; text-transform:uppercase; }
+        .pos-mini-row {
+            display:flex; align-items:center; justify-content:space-between;
+            padding:8px 12px; background:rgba(255,255,255,0.04);
+            border-radius:7px; margin-bottom:6px;
+        }
+        .pos-mini-name { font-size:12px; color:var(--text-light); }
+        .pos-mini-p { font-family:'Syne',sans-serif; font-size:12px; font-weight:700; color:var(--white); }
+        .pos-mini-total {
+            display:flex; justify-content:space-between; align-items:center;
+            padding:10px 12px; margin-top:4px;
+            background:rgba(4,212,190,0.07); border:1px solid rgba(4,212,190,0.15);
+            border-radius:7px;
+        }
+        .pos-mini-total-lbl { font-size:10px; color:var(--teal); font-weight:600; letter-spacing:0.06em; text-transform:uppercase; }
+        .pos-mini-total-amt { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; color:var(--teal); }
+
+        /* Receipt */
+        .receipt-panel {
+            background:#0a1828; border:1px solid rgba(255,255,255,0.08);
+            border-radius:10px; padding:16px 20px; position:relative; overflow:hidden;
+        }
+        .receipt-panel::before {
+            content:''; position:absolute; top:0; left:0; right:0; height:2px;
+            background:linear-gradient(90deg, var(--teal) 0%, rgba(4,212,190,0.2) 100%);
+        }
+        .receipt-speed {
+            position:absolute; top:14px; right:14px;
+            background:rgba(4,212,190,0.1); border:1px solid rgba(4,212,190,0.2);
+            border-radius:20px; padding:3px 10px;
+            font-family:'Syne',sans-serif; font-size:10px; font-weight:700; color:var(--teal);
+        }
+        .receipt-line {
+            display:flex; justify-content:space-between; align-items:center;
+            padding:7px 0; border-bottom:1px solid rgba(255,255,255,0.05);
+            animation:rcptLine 0.3s both;
+        }
+        @keyframes rcptLine { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:none} }
+        .receipt-line:nth-child(2){animation-delay:0.1s}
+        .receipt-line:nth-child(3){animation-delay:0.2s}
+        .receipt-line:nth-child(4){animation-delay:0.3s}
+        .receipt-line:last-child { border-bottom:none; }
+        .rcpt-n { font-size:12px; color:var(--text-light); }
+        .rcpt-p { font-family:'Syne',sans-serif; font-size:12px; font-weight:700; color:var(--white); }
+        .receipt-total {
+            margin-top:12px; padding:10px 0; border-top:1px dashed rgba(255,255,255,0.1);
+            display:flex; justify-content:space-between;
+        }
+        .rcpt-total-lbl { font-size:11px; font-weight:600; color:var(--text); text-transform:uppercase; letter-spacing:0.06em; }
+        .rcpt-total-amt { font-family:'Syne',sans-serif; font-size:20px; font-weight:700; color:var(--white); letter-spacing:-0.03em; }
+        .receipt-ok {
+            margin-top:12px; background:var(--teal); border-radius:6px; padding:10px;
+            text-align:center; font-family:'Syne',sans-serif; font-size:11px;
+            font-weight:700; color:var(--ink); letter-spacing:0.06em;
+        }
+
+        /* Search */
+        .search-box {
+            display:flex; align-items:center; gap:10px;
+            background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+            border-radius:8px; padding:10px 14px; margin-bottom:14px;
+        }
+        .search-box input {
+            background:none; border:none; outline:none;
+            font-size:13px; color:var(--white); flex:1;
+            font-family:'DM Sans',sans-serif;
+        }
+        .search-box input::placeholder { color:var(--text); }
+        .search-result {
+            display:flex; align-items:center; justify-content:space-between;
+            padding:11px 14px;
+            background:rgba(255,255,255,0.035);
+            border:1px solid rgba(255,255,255,0.06);
+            border-radius:8px; margin-bottom:7px;
+            transition:background 0.2s;
+        }
+        .search-result.highlight { background:rgba(4,212,190,0.07); border-color:rgba(4,212,190,0.18); }
+        .sr-info { display:flex; flex-direction:column; gap:2px; }
+        .sr-name { font-size:12.5px; color:var(--white); font-weight:400; }
+        .sr-meta { font-size:10px; color:var(--text); }
+        .sr-amt { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--white); }
+        .sr-badge {
+            font-size:9px; font-weight:700; padding:2px 7px; border-radius:10px;
+            background:rgba(4,212,190,0.1); color:var(--teal); margin-left:8px;
+        }
+
+        /* Charts */
+        .chart-bars {
+            display:flex; align-items:flex-end; gap:8px;
+            height:90px; padding:0 4px; margin-bottom:16px;
+        }
+        .bar-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; }
+        .bar-fill {
+            width:100%; border-radius:4px 4px 0 0;
+            background:linear-gradient(to top, rgba(4,212,190,0.5), rgba(4,212,190,0.15));
+            transition:height 0.6s cubic-bezier(0.22,1,0.36,1);
+        }
+        .bar-fill.peak { background:linear-gradient(to top, var(--teal), rgba(4,212,190,0.4)); }
+        .bar-lbl { font-size:9px; color:var(--text); font-weight:400; }
+        .chart-stat-row {
+            display:grid; grid-template-columns:1fr 1fr 1fr;
+            gap:8px; margin-top:4px;
+        }
+        .chart-stat {
+            background:rgba(255,255,255,0.04); border-radius:8px;
+            padding:10px 12px; text-align:center;
+        }
+        .cs-val { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; color:var(--white); letter-spacing:-0.02em; }
+        .cs-val em { color:var(--teal); font-style:normal; }
+        .cs-lbl { font-size:10px; color:var(--text); margin-top:2px; }
+
+        /* Dashboard */
+        .dash-grid {
+            display:grid; grid-template-columns:1fr 1fr; gap:8px;
+        }
+        .dash-tile {
+            background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06);
+            border-radius:10px; padding:14px 16px;
+            transition:background 0.2s;
+        }
+        .dash-tile:hover { background:rgba(4,212,190,0.05); border-color:rgba(4,212,190,0.12); }
+        .dt-ico {
+            width:30px; height:30px; border-radius:8px;
+            background:var(--teal-dim); border:1px solid rgba(4,212,190,0.12);
+            display:flex; align-items:center; justify-content:center; margin-bottom:10px;
+        }
+        .dt-name { font-family:'Syne',sans-serif; font-size:12px; font-weight:700; color:var(--white); margin-bottom:3px; }
+        .dt-sub { font-size:10px; color:var(--text); }
+
+        /* Product form */
+        .pf-field {
+            margin-bottom:10px;
+        }
+        .pf-label { font-size:10px; font-weight:600; color:var(--text); letter-spacing:0.06em; text-transform:uppercase; margin-bottom:5px; }
+        .pf-input {
+            width:100%; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+            border-radius:7px; padding:9px 12px;
+            font-size:13px; color:var(--white); font-family:'DM Sans',sans-serif;
+            outline:none; transition:border-color 0.2s;
+        }
+        .pf-input:focus { border-color:rgba(4,212,190,0.3); }
+        .pf-input.active { border-color:rgba(4,212,190,0.4); background:rgba(4,212,190,0.04); }
+        .pf-row2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+        .pf-save {
+            width:100%; margin-top:4px;
+            background:var(--teal); color:var(--ink);
+            font-family:'Syne',sans-serif; font-weight:700; font-size:12px;
+            padding:10px; border-radius:7px; border:none; cursor:pointer;
+            letter-spacing:0.03em;
+        }
+
+        /* Price label */
+        .label-preview {
+            background:#fff; border-radius:8px; padding:16px 20px;
+            display:flex; justify-content:space-between; align-items:center;
+            margin-bottom:10px;
+        }
+        .lp-name { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:#111; }
+        .lp-sku { font-size:10px; color:#888; margin-top:2px; }
+        .lp-price { font-family:'Syne',sans-serif; font-size:24px; font-weight:800; color:#111; letter-spacing:-0.03em; }
+        .lp-price span { font-size:13px; font-weight:400; color:#666; }
+        .lp-barcode {
+            display:flex; align-items:flex-end; gap:1px; height:28px;
+            margin-top:8px; padding-top:8px; border-top:1px solid #eee;
+        }
+        .lp-bar { width:2px; border-radius:1px; background:#222; }
+        .label-actions {
+            display:flex; gap:8px; margin-top:8px;
+        }
+        .lbl-btn {
+            flex:1; padding:9px; border-radius:6px; border:none; cursor:pointer;
+            font-family:'Syne',sans-serif; font-size:11px; font-weight:700;
+            letter-spacing:0.03em;
+        }
+        .lbl-btn.primary { background:var(--teal); color:var(--ink); }
+        .lbl-btn.sec { background:rgba(255,255,255,0.05); color:var(--text); border:1px solid rgba(255,255,255,0.08); }
+
+        /* Hardware */
+        .hw-list { display:flex; flex-direction:column; gap:8px; }
+        .hw-item {
+            display:flex; align-items:center; gap:14px;
+            background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06);
+            border-radius:10px; padding:13px 16px;
+        }
+        .hw-ico {
+            width:38px; height:38px; flex-shrink:0; border-radius:9px;
+            background:var(--teal-dim); border:1px solid rgba(4,212,190,0.12);
+            display:flex; align-items:center; justify-content:center;
+        }
+        .hw-name { font-size:13px; font-weight:400; color:var(--white); }
+        .hw-desc { font-size:11px; color:var(--text); margin-top:1px; }
+        .hw-check {
+            margin-left:auto;
+            width:20px; height:20px; border-radius:50%;
+            background:rgba(4,212,190,0.1); border:1px solid rgba(4,212,190,0.2);
+            display:flex; align-items:center; justify-content:center; flex-shrink:0;
+        }
+
+        /* ══════════════ CTA ══════════════ */
+        .cta-sec {
+            padding:104px 40px;
+            background:var(--navy);
+            position:relative; overflow:hidden;
+        }
+        .cta-glow {
+            position:absolute; inset:0;
+            background:radial-gradient(ellipse 800px 400px at 50% 50%, rgba(4,212,190,0.07) 0%, transparent 70%);
+            pointer-events:none;
+        }
+        .cta-inner { position:relative; z-index:2; text-align:center; max-width:580px; margin:0 auto; }
+        .cta-h2 {
+            font-family:'Syne',sans-serif;
+            font-size:clamp(28px,3.2vw,46px);
+            font-weight:700; line-height:1.12; letter-spacing:-0.02em;
+            color:var(--white); margin-bottom:14px;
+        }
+        .cta-p { font-size:17px; line-height:1.7; color:var(--text); margin-bottom:40px; font-weight:300; }
+
+        /* ══════════════ FOOTER ══════════════ */
+        footer {
+            background:var(--ink);
+            border-top:1px solid var(--border);
+            padding:52px 40px 32px;
+        }
+        .ft-inner { max-width:1080px; margin:0 auto; }
+        .ft-top {
+            display:grid; grid-template-columns:2.2fr 1fr 1fr 1fr;
+            gap:48px; padding-bottom:44px;
+            border-bottom:1px solid var(--border);
+        }
+        .ft-brand p { font-size:14px; line-height:1.65; color:var(--text); margin-top:14px; max-width:250px; font-weight:300; }
+        .ft-col-ttl {
+            font-family:'Syne',sans-serif; font-size:11px; font-weight:700;
+            color:var(--white); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:20px;
+        }
+        .ft-links { list-style:none; display:flex; flex-direction:column; gap:12px; }
+        .ft-links a { font-size:14px; color:var(--text); text-decoration:none; transition:color 0.2s; font-weight:300; }
+        .ft-links a:hover { color:var(--white); }
+        .ft-bottom { padding-top:26px; display:flex; align-items:center; justify-content:space-between; }
+        .ft-copy { font-size:13px; color:rgba(122,147,170,0.45); }
+        .ft-socials { display:flex; gap:10px; }
+        .social-a {
+            width:36px; height:36px; border:1px solid var(--border); border-radius:8px;
+            display:flex; align-items:center; justify-content:center;
+            color:var(--text); text-decoration:none;
+            transition:border-color 0.2s, color 0.2s, background 0.2s;
+        }
+        .social-a:hover { border-color:rgba(4,212,190,0.3); color:var(--teal); background:rgba(4,212,190,0.05); }
+
+        /* ══════════════ ANIMATIONS ══════════════ */
+        @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
+        .au { animation:fadeUp 0.7s cubic-bezier(0.22,1,0.36,1) both; }
+        .d1{animation-delay:0.08s}.d2{animation-delay:0.16s}.d3{animation-delay:0.24s}.d4{animation-delay:0.32s}
+
+        .will-animate { opacity:0; transform:translateY(20px); transition:opacity 0.6s cubic-bezier(0.22,1,0.36,1), transform 0.6s cubic-bezier(0.22,1,0.36,1); }
+        .will-animate.visible { opacity:1; transform:none; }
+        .will-animate[data-delay="0"]{transition-delay:0s}
+        .will-animate[data-delay="1"]{transition-delay:0.07s}
+        .will-animate[data-delay="2"]{transition-delay:0.14s}
+        .will-animate[data-delay="3"]{transition-delay:0.21s}
+        .will-animate[data-delay="4"]{transition-delay:0.28s}
+        .will-animate[data-delay="5"]{transition-delay:0.35s}
+        .will-animate[data-delay="6"]{transition-delay:0.07s}
+        .will-animate[data-delay="7"]{transition-delay:0.14s}
+        .will-animate[data-delay="8"]{transition-delay:0.21s}
+
+        /* ══════════════ RESPONSIVE ══════════════ */
+        @media(max-width:960px){
+            .site-nav { padding:0 24px; }
+            .nav-links { display:none; flex-direction:column; position:absolute; top:68px; left:0; right:0; background:rgba(6,13,26,0.97); padding:20px 24px; border-bottom:1px solid var(--border); backdrop-filter:blur(20px); gap:20px; }
+            .nav-links.open { display:flex; }
+            .hamburger { display:block; }
+            .pg-hero { padding:110px 24px 72px; }
+            .pills-sec { padding:48px 24px 0; }
+            .pills-grid { grid-template-columns:1fr; }
+            .divider-sec { padding:48px 24px 0; }
+            .feat-row { padding:56px 24px; }
+            .feat-row-inner { grid-template-columns:1fr; gap:40px; }
+            .feat-row-inner.rev { direction:ltr; }
+            .section { padding:64px 24px; }
+            .cta-sec { padding:72px 24px; }
+            footer { padding:40px 24px 28px; }
+            .ft-top { grid-template-columns:1fr 1fr; }
+            .ft-bottom { flex-direction:column; gap:16px; text-align:center; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ════════ NAV ════════ -->
+<nav class="site-nav">
+    <a href="index.html" class="nav-logo">
+        <img src="brand_assets/logo-blue.svg" alt="OblakKoder" class="logo-img">
+    </a>
+    <ul class="nav-links" id="navlinks">
+        <li><a href="features.html" class="active">Features</a></li>
+        <li><a href="index.html#how">How It Works</a></li>
+        <li><a href="index.html#integrations">Integrations</a></li>
+        <li><a href="index.html#pricing">Pricing</a></li>
+        <li><a href="#demo" class="nav-cta">Get Started</a></li>
+    </ul>
+    <button class="hamburger" id="ham" aria-label="Menu">
+        <svg width="24" height="17" viewBox="0 0 24 17" fill="none">
+            <rect width="24" height="2" rx="1" fill="rgba(235,243,255,0.8)"/>
+            <rect y="7.5" width="17" height="2" rx="1" fill="rgba(235,243,255,0.8)"/>
+            <rect y="15" width="24" height="2" rx="1" fill="rgba(235,243,255,0.8)"/>
+        </svg>
+    </button>
+</nav>
+
+<!-- ════════ HERO ════════ -->
+<section class="pg-hero">
+    <div class="hero-glow"></div>
+    <div class="pg-hero-inner">
+        <div class="pg-badge au">
+            <div class="badge-dot"></div>
+            <span class="badge-txt">Platform Features</span>
+        </div>
+        <h1 class="pg-h1 au d1">
+            POS built for <span class="accent">faster,<br>safer sales.</span>
+        </h1>
+        <p class="pg-sub au d2">
+            Everything from fiscal invoicing to delivery integrations — see how OblakKoder handles every part of your daily operations.
+        </p>
+        <div class="hero-btns au d3">
+            <a href="#demo" class="btn-primary">
+                Schedule a Demo
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <a href="index.html#pricing" class="btn-ghost">View Pricing</a>
+        </div>
+    </div>
+</section>
+
+<!-- ════════ FEATURE PILLS (9 items) ════════ -->
+<section class="pills-sec">
+    <div class="pills-inner">
+        <div class="pills-label au">All Capabilities</div>
+        <div class="pills-grid">
+
+            <a class="pill-item" href="#wolt">
+                <span class="pill-num">01</span>
+                <div class="pill-ico">
+                    <svg width="17" height="17" viewBox="0 0 17 17" fill="none"><circle cx="8.5" cy="8.5" r="5.5" stroke="#04D4BE" stroke-width="1.6"/><text x="8.5" y="13" text-anchor="middle" font-family="Syne,sans-serif" font-size="8" font-weight="800" fill="#04D4BE">W</text></svg>
+                </div>
+                <div class="pill-text">
+                    <div class="pill-name">Wolt Integration</div>
+                    <div class="pill-desc">Delivery orders land directly in your POS — no manual entry, no extra tablet.</div>
+                </div>
+                <span class="pill-arrow">→</span>
+            </a>
+
+            <a class="pill-item" href="#invoicing">
+                <span class="pill-num">02</span>
+                <div class="pill-ico">
+                    <svg width="17" height="17" viewBox="0 0 17 17" fill="none"><path d="M4 2h6l4 4v9a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="#04D4BE" stroke-width="1.5"/><path d="M10 2v5h4M5 9h7M5 12h4" stroke="#04D4BE" stroke-width="1.3" stroke-linecap="round"/></svg>
+                </div>
+                <div class="pill-text">
+                    <div class="pill-name">Fast Fiscal Invoicing</div>
+                    <div class="pill-desc">Issue compliant fiscal receipts in under 5 seconds with automatic recording.</div>
+                </div>
+                <span class="pill-arrow">→</span>
+            </a>
+
+            <a class="pill-item" href="#inventory">
+                <span class="pill-num">03</span>
+                <div class="pill-ico">
+                    <svg width="17" height="17" viewBox="0 0 17 17" fill="none"><rect x="2" y="9" width="4" height="6" rx="1" stroke="#04D4BE" stroke-width="1.5"/><rect x="6.5" y="5.5" width="4" height="9.5" rx="1" stroke="#04D4BE" stroke-width="1.5"/><rect x="11" y="2" width="4" height="13" rx="1" stroke="#04D4BE" stroke-width="1.5"/></svg>
+                </div>
+                <div class="pill-text">
+                    <div class="pill-name">Inventory Management</div>
+                    <div class="pill-desc">Real-time stock control with automatic quantity updates and low-stock alerts.</div>
+                </div>
+                <span class="pill-arrow">→</span>
+            </a>
+
+            <a class="pill-item" href="#efaktura">
+                <span class="pill-num">04</span>
+                <div class="pill-ico">
+                    <svg width="17" height="17" viewBox="0 0 17 17" fill="none"><path d="M2 8.5C2 12.09 4.91 15 8.5 15S15 12.09 15 8.5 12.09 2 8.5 2" stroke="#04D4BE" stroke-width="1.5" stroke-linecap="round"/><path d="M5 8.5l2.5 2.5L12 5" stroke="#04D4BE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="pill-text">
+                    <div class="pill-name">eFaktura / SEF</div>
+                    <div class="pill-desc">Send and receive electronic invoices with automatic fiscal sync — no paperwork.</div>
+                </div>
+                <span class="pill-arrow">→</span>
+            </a>
+
+            <a class="pill-item" href="#analytics">
+                <span class="pill-num">05</span>
+                <div class="pill-ico">
+                    <svg width="17" height="17" viewBox="0 0 17 17" fill="none"><path d="M2 12l4-4 3 3 4-5 3 2" stroke="#04D4BE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="pill-text">
+                    <div class="pill-name">Sales Analytics</div>
+                    <div class="pill-desc">Detailed revenue reports, stock snapshots, and performance dashboards.</div>
+                </div>
+                <span class="pill-arrow">→</span>
+            </a>
+
+            <a class="pill-item" href="#offline">
+                <span class="pill-num">06</span>
+                <div class="pill-ico">
+                    <svg width="17" height="17" viewBox="0 0 17 17" fill="none"><path d="M3 8.5h2M12 8.5h2M8.5 3v2M8.5 12v2" stroke="#04D4BE" stroke-width="1.5" stroke-linecap="round"/><circle cx="8.5" cy="8.5" r="3" stroke="#04D4BE" stroke-width="1.5"/></svg>
+                </div>
+                <div class="pill-text">
+                    <div class="pill-name">Offline Mode</div>
+                    <div class="pill-desc">Keep selling during network outages — all transactions sync automatically.</div>
+                </div>
+                <span class="pill-arrow">→</span>
+            </a>
+
+            <a class="pill-item" href="#erp">
+                <span class="pill-num">07</span>
+                <div class="pill-ico">
+                    <svg width="17" height="17" viewBox="0 0 17 17" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="#04D4BE" stroke-width="1.5"/><rect x="10" y="2" width="5" height="5" rx="1" stroke="#04D4BE" stroke-width="1.5"/><rect x="6" y="10" width="5" height="5" rx="1" stroke="#04D4BE" stroke-width="1.5"/><path d="M4.5 7v2.5H8.5M12.5 7v2.5H8.5" stroke="#04D4BE" stroke-width="1.3" stroke-linecap="round"/></svg>
+                </div>
+                <div class="pill-text">
+                    <div class="pill-name">ERP Integration</div>
+                    <div class="pill-desc">Connect to your enterprise system and automate data flow without manual entry.</div>
+                </div>
+                <span class="pill-arrow">→</span>
+            </a>
+
+            <a class="pill-item" href="#support">
+                <span class="pill-num">08</span>
+                <div class="pill-ico">
+                    <svg width="17" height="17" viewBox="0 0 17 17" fill="none"><circle cx="8.5" cy="8.5" r="6" stroke="#04D4BE" stroke-width="1.5"/><path d="M6.5 6.5a2 2 0 013.5 1.3c0 1.5-2 1.7-2 3" stroke="#04D4BE" stroke-width="1.5" stroke-linecap="round"/><circle cx="8.5" cy="12" r="0.7" fill="#04D4BE"/></svg>
+                </div>
+                <div class="pill-text">
+                    <div class="pill-name">24/7 Support</div>
+                    <div class="pill-desc">Fast answers when you need them — because every minute at the register matters.</div>
+                </div>
+                <span class="pill-arrow">→</span>
+            </a>
+
+            <a class="pill-item" href="#onboarding">
+                <span class="pill-num">09</span>
+                <div class="pill-ico">
+                    <svg width="17" height="17" viewBox="0 0 17 17" fill="none"><circle cx="8.5" cy="5.5" r="2.5" stroke="#04D4BE" stroke-width="1.5"/><path d="M3.5 15c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="#04D4BE" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </div>
+                <div class="pill-text">
+                    <div class="pill-name">Quick Staff Onboarding</div>
+                    <div class="pill-desc">Intuitive interface — new team members are up to speed without complex training.</div>
+                </div>
+                <span class="pill-arrow">→</span>
+            </a>
+
+        </div>
+    </div>
+</section>
+
+<!-- ════════ DIVIDER HEADING ════════ -->
+<div class="divider-sec" style="padding-top:80px;">
+    <div class="divider-inner">
+        <div class="sec-label">In Depth</div>
+        <h2 class="divider-h2">Sales under control.</h2>
+        <p class="divider-sub">From the first fiscal receipt to the end-of-day financial report — everything you need to run your store, clear and close at hand.</p>
+    </div>
+</div>
+
+<!-- ════════ FEATURE ROWS ════════ -->
+
+<!-- 1 · Wolt -->
+<div class="feat-row" id="wolt">
+    <div class="feat-row-inner">
+        <div>
+            <div class="feat-num">01 / 08</div>
+            <div class="feat-tag">Wolt Integration</div>
+            <h3 class="feat-h3">Wolt orders — automatically in your POS</h3>
+            <p class="feat-p">Forget manual re-entry. Our Wolt integration connects your delivery orders directly to the POS so every order appears on screen the moment it's placed — finish it like any other sale.</p>
+            <ul class="feat-bullets">
+                <li>Orders appear instantly, no extra tablet required</li>
+                <li>Fewer errors, cleaner transaction records</li>
+                <li>Activates immediately, no additional setup</li>
+                <li>Included free with every POS licence</li>
+            </ul>
+        </div>
+        <div class="mockup-wrap">
+            <div class="mockup-panel">
+                <div class="mockup-bar">
+                    <div class="mb-dot" style="background:#FF4757;"></div>
+                    <div class="mb-dot" style="background:#FFB800;margin-left:4px;"></div>
+                    <div class="mb-dot" style="background:#04D4BE;margin-left:4px;"></div>
+                    <span class="mb-title">Wolt Integration</span>
+                    <div class="mb-status"><div class="mb-live"></div><span class="mb-live-txt">Live</span></div>
+                </div>
+                <!-- Incoming Wolt order -->
+                <div class="wolt-order">
+                    <div class="wolt-hdr">
+                        <div class="wolt-badge">W</div>
+                        <div>
+                            <div class="wolt-lbl">New Wolt Order #4821</div>
+                            <div class="wolt-sub">Received just now · Table pickup</div>
+                        </div>
+                    </div>
+                    <div class="wolt-items">
+                        <div class="wolt-row"><span class="wolt-name">Margherita Pizza ×1</span><span class="wolt-price">€9.50</span></div>
+                        <div class="wolt-row"><span class="wolt-name">Caesar Salad ×1</span><span class="wolt-price">€7.00</span></div>
+                        <div class="wolt-row"><span class="wolt-name">Sparkling Water ×2</span><span class="wolt-price">€3.00</span></div>
+                    </div>
+                </div>
+                <div class="wolt-arrow-row">
+                    <div class="wolt-arrow-line"></div>
+                    <span class="wolt-arrow-txt">→ synced to POS</span>
+                    <div class="wolt-arrow-line"></div>
+                </div>
+                <div class="pos-mini-row"><span class="pos-mini-name">Margherita Pizza</span><span class="pos-mini-p">€9.50</span></div>
+                <div class="pos-mini-row"><span class="pos-mini-name">Caesar Salad</span><span class="pos-mini-p">€7.00</span></div>
+                <div class="pos-mini-row"><span class="pos-mini-name">Sparkling Water ×2</span><span class="pos-mini-p">€3.00</span></div>
+                <div class="pos-mini-total">
+                    <span class="pos-mini-total-lbl">Order Total</span>
+                    <span class="pos-mini-total-amt">€19.50</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2 · Fast Invoicing -->
+<div class="feat-row" id="invoicing">
+    <div class="feat-row-inner rev">
+        <div>
+            <div class="feat-num">02 / 08</div>
+            <div class="feat-tag">Fiscal Invoicing</div>
+            <h3 class="feat-h3">Fiscal receipt in seconds — no waiting</h3>
+            <p class="feat-p">Everything is handled directly on your terminal — no manual re-entry, no extra clicks. Every transaction is automatically recorded and fiscalized the instant it completes.</p>
+            <ul class="feat-bullets">
+                <li>Under 5 seconds from sale to issued receipt</li>
+                <li>Multi-receipt support — process several sales simultaneously</li>
+                <li>Works with multiple POS printers across locations</li>
+                <li>Full fiscal compliance, automatically maintained</li>
+            </ul>
+        </div>
+        <div class="mockup-wrap">
+            <div class="mockup-panel">
+                <div class="mockup-bar">
+                    <div class="mb-dot" style="background:#FF4757;"></div>
+                    <div class="mb-dot" style="background:#FFB800;margin-left:4px;"></div>
+                    <div class="mb-dot" style="background:#04D4BE;margin-left:4px;"></div>
+                    <span class="mb-title">Receipt Terminal</span>
+                    <div class="mb-status"><div class="mb-live"></div><span class="mb-live-txt">Live</span></div>
+                </div>
+                <div class="receipt-panel">
+                    <span class="receipt-speed">&lt; 5s</span>
+                    <div style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;color:var(--text);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;">Fiscal Receipt #F-20482</div>
+                    <div class="receipt-line"><span class="rcpt-n">Organic Milk 1L ×2</span><span class="rcpt-p">€3.40</span></div>
+                    <div class="receipt-line"><span class="rcpt-n">Artisan Bread ×1</span><span class="rcpt-p">€2.80</span></div>
+                    <div class="receipt-line"><span class="rcpt-n">Greek Yogurt 500g ×3</span><span class="rcpt-p">€6.30</span></div>
+                    <div class="receipt-line"><span class="rcpt-n">Fresh Orange Juice ×1</span><span class="rcpt-p">€3.50</span></div>
+                    <div class="receipt-total">
+                        <span class="rcpt-total-lbl">Total Due</span>
+                        <span class="rcpt-total-amt">€16.00</span>
+                    </div>
+                    <div class="receipt-ok">
+                        <svg style="display:inline;margin-right:6px;" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6l3 3 6-6" stroke="#060D1A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        FISCALIZED
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3 · Receipt Search -->
+<div class="feat-row" id="search">
+    <div class="feat-row-inner">
+        <div>
+            <div class="feat-num">03 / 08</div>
+            <div class="feat-tag">Receipt Search</div>
+            <h3 class="feat-h3">Find any receipt instantly — no digging</h3>
+            <p class="feat-p">Every issued receipt is one search away. Find it by item name, date, or amount in seconds — no manual sorting, no paper trails, no wasted time.</p>
+            <ul class="feat-bullets">
+                <li>Search by product name, date range, or amount</li>
+                <li>Instant access for returns, complaints, and audits</li>
+                <li>Full transaction history always at hand</li>
+                <li>Export results for accounting or reporting</li>
+            </ul>
+        </div>
+        <div class="mockup-wrap">
+            <div class="mockup-panel">
+                <div class="mockup-bar">
+                    <div class="mb-dot" style="background:#FF4757;"></div>
+                    <div class="mb-dot" style="background:#FFB800;margin-left:4px;"></div>
+                    <div class="mb-dot" style="background:#04D4BE;margin-left:4px;"></div>
+                    <span class="mb-title">Receipt Search</span>
+                </div>
+                <div class="search-box">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="rgba(122,147,170,0.7)" stroke-width="1.4"/><path d="M9.5 9.5L13 13" stroke="rgba(122,147,170,0.7)" stroke-width="1.4" stroke-linecap="round"/></svg>
+                    <input type="text" placeholder="Search receipts…" value="Greek Yogurt" readonly>
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 3h8M3.5 6h5M5 9h2" stroke="rgba(122,147,170,0.5)" stroke-width="1.2" stroke-linecap="round"/></svg>
+                </div>
+                <div style="font-size:10px;color:var(--text);margin-bottom:10px;">3 receipts found</div>
+                <div class="search-result highlight">
+                    <div class="sr-info">
+                        <span class="sr-name">Receipt #F-20482<span class="sr-badge">Return eligible</span></span>
+                        <span class="sr-meta">Today, 14:32 · Greek Yogurt 500g ×3</span>
+                    </div>
+                    <span class="sr-amt">€6.30</span>
+                </div>
+                <div class="search-result">
+                    <div class="sr-info">
+                        <span class="sr-name">Receipt #F-20411</span>
+                        <span class="sr-meta">Yesterday, 11:04 · Greek Yogurt 500g ×1</span>
+                    </div>
+                    <span class="sr-amt">€2.10</span>
+                </div>
+                <div class="search-result">
+                    <div class="sr-info">
+                        <span class="sr-name">Receipt #F-20388</span>
+                        <span class="sr-meta">Jun 3, 09:17 · Greek Yogurt 500g ×2</span>
+                    </div>
+                    <span class="sr-amt">€4.20</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 4 · Analytics -->
+<div class="feat-row" id="analytics">
+    <div class="feat-row-inner rev">
+        <div>
+            <div class="feat-num">04 / 08</div>
+            <div class="feat-tag">Revenue Control</div>
+            <h3 class="feat-h3">Revenue insight — no guesswork, no spreadsheets</h3>
+            <p class="feat-p">Sales, inventory, and financial reports are available instantly — no data extraction, no complex calculations, no manual totaling. See your business clearly and make better decisions.</p>
+            <ul class="feat-bullets">
+                <li>Real-time revenue and margin tracking</li>
+                <li>Stock valuation and movement history</li>
+                <li>Shift reports and end-of-day summaries</li>
+                <li>Export to PDF or accounting software</li>
+            </ul>
+        </div>
+        <div class="mockup-wrap">
+            <div class="mockup-panel">
+                <div class="mockup-bar">
+                    <div class="mb-dot" style="background:#FF4757;"></div>
+                    <div class="mb-dot" style="background:#FFB800;margin-left:4px;"></div>
+                    <div class="mb-dot" style="background:#04D4BE;margin-left:4px;"></div>
+                    <span class="mb-title">Revenue Dashboard</span>
+                    <div class="mb-status"><div class="mb-live"></div><span class="mb-live-txt">Live</span></div>
+                </div>
+                <div style="font-size:10px;font-weight:600;color:var(--text);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">This week</div>
+                <div class="chart-bars">
+                    <div class="bar-col"><div class="bar-fill" style="height:48px;"></div><span class="bar-lbl">Mon</span></div>
+                    <div class="bar-col"><div class="bar-fill" style="height:62px;"></div><span class="bar-lbl">Tue</span></div>
+                    <div class="bar-col"><div class="bar-fill" style="height:54px;"></div><span class="bar-lbl">Wed</span></div>
+                    <div class="bar-col"><div class="bar-fill peak" style="height:80px;"></div><span class="bar-lbl">Thu</span></div>
+                    <div class="bar-col"><div class="bar-fill" style="height:70px;"></div><span class="bar-lbl">Fri</span></div>
+                    <div class="bar-col"><div class="bar-fill peak" style="height:88px;"></div><span class="bar-lbl">Sat</span></div>
+                    <div class="bar-col"><div class="bar-fill" style="height:38px;"></div><span class="bar-lbl">Sun</span></div>
+                </div>
+                <div class="chart-stat-row">
+                    <div class="chart-stat"><div class="cs-val">€4,182<em></em></div><div class="cs-lbl">Revenue</div></div>
+                    <div class="chart-stat"><div class="cs-val">312<em></em></div><div class="cs-lbl">Receipts</div></div>
+                    <div class="chart-stat"><div class="cs-val">€13<em>.4</em></div><div class="cs-lbl">Avg. basket</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 5 · Dashboard -->
+<div class="feat-row" id="dashboard">
+    <div class="feat-row-inner">
+        <div>
+            <div class="feat-num">05 / 08</div>
+            <div class="feat-tag">Main Dashboard</div>
+            <h3 class="feat-h3">Everything at a glance — on one screen</h3>
+            <p class="feat-p">The OblakKoder home screen is designed so everything you need is visible at a glance with no unnecessary menus. Sales, invoices, inventory, and reports — all within two clicks.</p>
+            <ul class="feat-bullets">
+                <li>Sales, receipts, stock, and reports at the top level</li>
+                <li>Clean layout — no hunting through menus</li>
+                <li>Settings, suppliers, and docs all logically grouped</li>
+                <li>Fast daily startup — ready in under 10 seconds</li>
+            </ul>
+        </div>
+        <div class="mockup-wrap">
+            <div class="mockup-panel">
+                <div class="mockup-bar">
+                    <div class="mb-dot" style="background:#FF4757;"></div>
+                    <div class="mb-dot" style="background:#FFB800;margin-left:4px;"></div>
+                    <div class="mb-dot" style="background:#04D4BE;margin-left:4px;"></div>
+                    <span class="mb-title">POS Dashboard</span>
+                </div>
+                <div class="dash-grid">
+                    <div class="dash-tile">
+                        <div class="dt-ico">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="4" width="14" height="9" rx="1.5" stroke="#04D4BE" stroke-width="1.4"/><path d="M1 7h14" stroke="#04D4BE" stroke-width="1.4"/></svg>
+                        </div>
+                        <div class="dt-name">New Sale</div>
+                        <div class="dt-sub">Start transaction</div>
+                    </div>
+                    <div class="dash-tile">
+                        <div class="dt-ico">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 2h6l4 3v9a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="#04D4BE" stroke-width="1.4"/><path d="M5 9h6M5 11.5h4" stroke="#04D4BE" stroke-width="1.3" stroke-linecap="round"/></svg>
+                        </div>
+                        <div class="dt-name">Receipts</div>
+                        <div class="dt-sub">Search &amp; manage</div>
+                    </div>
+                    <div class="dash-tile">
+                        <div class="dt-ico">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="9" width="3.5" height="5" rx="1" stroke="#04D4BE" stroke-width="1.4"/><rect x="6.25" y="5.5" width="3.5" height="8.5" rx="1" stroke="#04D4BE" stroke-width="1.4"/><rect x="11" y="2" width="3.5" height="12" rx="1" stroke="#04D4BE" stroke-width="1.4"/></svg>
+                        </div>
+                        <div class="dt-name">Inventory</div>
+                        <div class="dt-sub">Stock levels</div>
+                    </div>
+                    <div class="dash-tile">
+                        <div class="dt-ico">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 10l3.5-3.5 2.5 2.5 4-5 3 2" stroke="#04D4BE" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                        <div class="dt-name">Reports</div>
+                        <div class="dt-sub">Revenue &amp; trends</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 6 · Product Entry -->
+<div class="feat-row" id="products">
+    <div class="feat-row-inner rev">
+        <div>
+            <div class="feat-num">06 / 08</div>
+            <div class="feat-tag">Product Management</div>
+            <h3 class="feat-h3">Add products fast — no extra tools needed</h3>
+            <p class="feat-p">Add and edit products, categories, and prices in a few steps, directly in the system — no separate tools, no spreadsheets. All changes apply instantly to sales and inventory.</p>
+            <ul class="feat-bullets">
+                <li>Add new items in under 30 seconds</li>
+                <li>Bulk import via barcode scanner or CSV</li>
+                <li>Price and category changes reflect immediately at checkout</li>
+                <li>Multi-location product sync built in</li>
+            </ul>
+        </div>
+        <div class="mockup-wrap">
+            <div class="mockup-panel">
+                <div class="mockup-bar">
+                    <div class="mb-dot" style="background:#FF4757;"></div>
+                    <div class="mb-dot" style="background:#FFB800;margin-left:4px;"></div>
+                    <div class="mb-dot" style="background:#04D4BE;margin-left:4px;"></div>
+                    <span class="mb-title">Add Product</span>
+                </div>
+                <div class="pf-field">
+                    <div class="pf-label">Product Name</div>
+                    <input class="pf-input active" type="text" value="Organic Milk 1L" readonly>
+                </div>
+                <div class="pf-row2">
+                    <div class="pf-field">
+                        <div class="pf-label">Price (€)</div>
+                        <input class="pf-input" type="text" value="1.70" readonly>
+                    </div>
+                    <div class="pf-field">
+                        <div class="pf-label">VAT Rate</div>
+                        <input class="pf-input" type="text" value="20%" readonly>
+                    </div>
+                </div>
+                <div class="pf-row2">
+                    <div class="pf-field">
+                        <div class="pf-label">Category</div>
+                        <input class="pf-input" type="text" value="Dairy" readonly>
+                    </div>
+                    <div class="pf-field">
+                        <div class="pf-label">Barcode</div>
+                        <input class="pf-input" type="text" value="3830019" readonly>
+                    </div>
+                </div>
+                <button class="pf-save">Save Product →</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 7 · Price Labels -->
+<div class="feat-row" id="labels">
+    <div class="feat-row-inner">
+        <div>
+            <div class="feat-num">07 / 08</div>
+            <div class="feat-tag">Price Labels</div>
+            <h3 class="feat-h3">Shelf labels ready in one click</h3>
+            <p class="feat-p">Generate price labels the moment you add or update a product. The system prepares print-ready labels with exact names and amounts — no manual typing, no errors.</p>
+            <ul class="feat-bullets">
+                <li>Instant generation on product creation or price change</li>
+                <li>Works with standard label printers</li>
+                <li>Batch print for entire categories at once</li>
+                <li>Professional, consistent shelf appearance</li>
+            </ul>
+        </div>
+        <div class="mockup-wrap">
+            <div class="mockup-panel">
+                <div class="mockup-bar">
+                    <div class="mb-dot" style="background:#FF4757;"></div>
+                    <div class="mb-dot" style="background:#FFB800;margin-left:4px;"></div>
+                    <div class="mb-dot" style="background:#04D4BE;margin-left:4px;"></div>
+                    <span class="mb-title">Label Preview</span>
+                </div>
+                <div style="font-size:10px;font-weight:600;color:var(--text);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;">Print Preview</div>
+                <div class="label-preview">
+                    <div>
+                        <div class="lp-name">Organic Milk 1L</div>
+                        <div class="lp-sku">SKU: 3830019 · Dairy</div>
+                        <div class="lp-barcode">
+                            <!-- simulated barcode -->
+                            <div class="lp-bar" style="height:100%;"></div><div class="lp-bar" style="height:70%;background:#555;"></div><div class="lp-bar" style="height:100%;"></div><div class="lp-bar" style="height:100%;background:#555;"></div><div class="lp-bar" style="height:70%;"></div><div class="lp-bar" style="height:100%;"></div><div class="lp-bar" style="height:100%;background:#555;"></div><div class="lp-bar" style="height:60%;"></div><div class="lp-bar" style="height:100%;background:#555;"></div><div class="lp-bar" style="height:100%;"></div><div class="lp-bar" style="height:70%;background:#555;"></div><div class="lp-bar" style="height:100%;"></div><div class="lp-bar" style="height:100%;background:#555;"></div><div class="lp-bar" style="height:80%;"></div><div class="lp-bar" style="height:100%;background:#555;"></div><div class="lp-bar" style="height:60%;"></div><div class="lp-bar" style="height:100%;background:#555;"></div><div class="lp-bar" style="height:100%;"></div>
+                        </div>
+                    </div>
+                    <div class="lp-price">€1.70<br><span>incl. VAT</span></div>
+                </div>
+                <div class="label-actions">
+                    <button class="lbl-btn primary">
+                        <svg style="display:inline;margin-right:5px;" width="11" height="11" viewBox="0 0 11 11" fill="none"><rect x="1" y="3" width="9" height="7" rx="1" stroke="#060D1A" stroke-width="1.2"/><path d="M3 3V1.5h5V3M3 7.5h5" stroke="#060D1A" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        Print Label
+                    </button>
+                    <button class="lbl-btn sec">Batch Print</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 8 · Hardware -->
+<div class="feat-row" id="hardware">
+    <div class="feat-row-inner rev">
+        <div>
+            <div class="feat-num">08 / 08</div>
+            <div class="feat-tag">Hardware Package</div>
+            <h3 class="feat-h3">Everything you need — in one complete kit</h3>
+            <p class="feat-p">We offer a complete POS package with all the hardware you need to start selling immediately. Buy or lease — our team handles delivery, setup, and onboarding so you never lose a day.</p>
+            <ul class="feat-bullets">
+                <li>No vendor lock-in — works with existing hardware too</li>
+                <li>Delivered, installed, and tested by our team</li>
+                <li>Purchase or monthly lease available</li>
+                <li>All-in-one warranty and support included</li>
+            </ul>
+        </div>
+        <div class="mockup-wrap">
+            <div class="mockup-panel">
+                <div class="mockup-bar">
+                    <div class="mb-dot" style="background:#FF4757;"></div>
+                    <div class="mb-dot" style="background:#FFB800;margin-left:4px;"></div>
+                    <div class="mb-dot" style="background:#04D4BE;margin-left:4px;"></div>
+                    <span class="mb-title">Hardware Kit</span>
+                </div>
+                <div class="hw-list">
+                    <div class="hw-item">
+                        <div class="hw-ico"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="14" height="10" rx="2" stroke="#04D4BE" stroke-width="1.5"/><path d="M6 16h6M9 12v4" stroke="#04D4BE" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+                        <div><div class="hw-name">All-in-One Touchscreen PC</div><div class="hw-desc">15" or 21" capacitive touch display</div></div>
+                        <div class="hw-check"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="#04D4BE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                    </div>
+                    <div class="hw-item">
+                        <div class="hw-ico"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="5" width="14" height="10" rx="2" stroke="#04D4BE" stroke-width="1.5"/><path d="M5 2v3M9 2v3M13 2v3" stroke="#04D4BE" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+                        <div><div class="hw-name">Thermal Receipt Printer</div><div class="hw-desc">80mm fiscal-certified printer</div></div>
+                        <div class="hw-check"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="#04D4BE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                    </div>
+                    <div class="hw-item">
+                        <div class="hw-ico"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 14l3-8 3 8M5.5 11h3M13 6v8" stroke="#04D4BE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="13" cy="4" r="1.5" fill="#04D4BE"/></svg></div>
+                        <div><div class="hw-name">Barcode Scanner</div><div class="hw-desc">1D/2D wired or wireless</div></div>
+                        <div class="hw-check"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="#04D4BE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                    </div>
+                    <div class="hw-item">
+                        <div class="hw-ico"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="3" y="5" width="12" height="8" rx="2" stroke="#04D4BE" stroke-width="1.5"/><path d="M6 5V4a3 3 0 016 0v1" stroke="#04D4BE" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+                        <div><div class="hw-name">Security Element Reader</div><div class="hw-desc">Certified e-ID fiscal device</div></div>
+                        <div class="hw-check"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="#04D4BE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                    </div>
+                    <div class="hw-item">
+                        <div class="hw-ico"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="3" width="14" height="12" rx="2" stroke="#04D4BE" stroke-width="1.5"/><path d="M5 7h8M5 10h5" stroke="#04D4BE" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+                        <div><div class="hw-name">Keyboard &amp; Mouse</div><div class="hw-desc">Compact USB or wireless set</div></div>
+                        <div class="hw-check"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="#04D4BE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ════════ ALSO INCLUDED (Offline, ERP, Support, Onboarding) ════════ -->
+<section class="section" style="background:var(--navy);" id="offline">
+    <div class="sec-inner">
+        <div class="sec-label">Additional Capabilities</div>
+        <h2 style="font-family:'Syne',sans-serif;font-size:clamp(28px,3.2vw,46px);font-weight:700;line-height:1.12;letter-spacing:-0.02em;color:var(--white);margin-bottom:40px;">Built for the real world.</h2>
+
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;">
+            <div class="feat-card-sm" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;">
+                <div style="width:44px;height:44px;background:var(--teal-dim);border:1px solid rgba(4,212,190,0.14);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 10h2M15 10h2M10 3v2M10 15v2" stroke="#04D4BE" stroke-width="1.6" stroke-linecap="round"/><circle cx="10" cy="10" r="4" stroke="#04D4BE" stroke-width="1.6"/></svg>
+                </div>
+                <h3 id="offline-heading" style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--white);margin-bottom:10px;">Offline Mode</h3>
+                <p style="font-size:14px;line-height:1.68;color:var(--text);font-weight:300;">Keep selling even when the network goes down. All transactions are saved locally and automatically synced to the cloud the moment connectivity is restored. Zero data loss, zero downtime for your customers.</p>
+            </div>
+
+            <div class="feat-card-sm" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;" id="erp">
+                <div style="width:44px;height:44px;background:var(--teal-dim);border:1px solid rgba(4,212,190,0.14);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="6" height="6" rx="1" stroke="#04D4BE" stroke-width="1.6"/><rect x="12" y="2" width="6" height="6" rx="1" stroke="#04D4BE" stroke-width="1.6"/><rect x="7" y="12" width="6" height="6" rx="1" stroke="#04D4BE" stroke-width="1.6"/><path d="M5 8v3.5H10M15 8v3.5H10" stroke="#04D4BE" stroke-width="1.4" stroke-linecap="round"/></svg>
+                </div>
+                <h3 style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--white);margin-bottom:10px;">ERP Integration</h3>
+                <p style="font-size:14px;line-height:1.68;color:var(--text);font-weight:300;">Connect OblakKoder to your existing ERP system and automate the flow of sales data, inventory changes, and revenue figures — no manual re-entry between systems, ever.</p>
+            </div>
+
+            <div class="feat-card-sm" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;" id="support">
+                <div style="width:44px;height:44px;background:var(--teal-dim);border:1px solid rgba(4,212,190,0.14);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 16V6a2 2 0 012-2h8a2 2 0 012 2v6a2 2 0 01-2 2H7l-3 2z" stroke="#04D4BE" stroke-width="1.6" stroke-linejoin="round"/><path d="M7.5 9h5M7.5 12h3" stroke="#04D4BE" stroke-width="1.4" stroke-linecap="round"/></svg>
+                </div>
+                <h3 style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--white);margin-bottom:10px;">24/7 Support</h3>
+                <p style="font-size:14px;line-height:1.68;color:var(--text);font-weight:300;">Our support team responds fast — because we know every minute your register is down costs you money. Get help via chat, phone, or email whenever you need it, around the clock.</p>
+            </div>
+
+            <div class="feat-card-sm" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;" id="onboarding">
+                <div style="width:44px;height:44px;background:var(--teal-dim);border:1px solid rgba(4,212,190,0.14);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="6" r="3" stroke="#04D4BE" stroke-width="1.6"/><path d="M4 18c0-3.31 2.69-6 6-6s6 2.69 6 6" stroke="#04D4BE" stroke-width="1.6" stroke-linecap="round"/></svg>
+                </div>
+                <h3 style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--white);margin-bottom:10px;">Quick Staff Onboarding</h3>
+                <p style="font-size:14px;line-height:1.68;color:var(--text);font-weight:300;">The interface is designed so new staff can handle real transactions within their first hour — no lengthy training programs, no confusion at the register during a rush.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ════════ CTA ════════ -->
+<section class="cta-sec" id="demo">
+    <div class="cta-glow"></div>
+    <div class="cta-inner">
+        <div class="sec-label" style="justify-content:center;">Schedule a Demo</div>
+        <h2 class="cta-h2">See it running in your store.</h2>
+        <p class="cta-p">Book a 30-minute live demo and see exactly how OblakKoder handles your daily workflow — from the first sale to the end-of-day report.</p>
+        <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+            <a href="#" class="btn-primary" style="font-size:15px;padding:16px 32px;">
+                Book a Demo
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <a href="index.html#pricing" class="btn-ghost" style="font-size:15px;padding:16px 28px;">View Pricing</a>
+        </div>
+        <p style="margin-top:18px;font-size:13px;color:rgba(122,147,170,0.5);">No credit card required &nbsp;·&nbsp; Setup in under 30 minutes</p>
+    </div>
+</section>
+
+<!-- ════════ FOOTER ════════ -->
+<footer>
+    <div class="ft-inner">
+        <div class="ft-top">
+            <div class="ft-brand">
+                <a href="index.html" class="nav-logo">
+                    <img src="brand_assets/logo-blue.svg" alt="OblakKoder" class="logo-img">
+                </a>
+                <p>Cloud-native POS software for modern retail and hospitality. Built for speed, compliance, and growth.</p>
+            </div>
+            <div>
+                <div class="ft-col-ttl">Product</div>
+                <ul class="ft-links">
+                    <li><a href="features.html">Features</a></li>
+                    <li><a href="index.html#pricing">Pricing</a></li>
+                    <li><a href="index.html#integrations">Integrations</a></li>
+                    <li><a href="#demo">Demo</a></li>
+                </ul>
+            </div>
+            <div>
+                <div class="ft-col-ttl">Company</div>
+                <ul class="ft-links">
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Partner Program</a></li>
+                    <li><a href="#">Support</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+            <div>
+                <div class="ft-col-ttl">Legal</div>
+                <ul class="ft-links">
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">GDPR</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="ft-bottom">
+            <span class="ft-copy">© 2025 Oblak Koder d.o.o. · All rights reserved.</span>
+            <div class="ft-socials">
+                <a href="#" class="social-a" aria-label="LinkedIn">
+                    <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+                </a>
+                <a href="#" class="social-a" aria-label="Instagram">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                </a>
+                <a href="#" class="social-a" aria-label="Facebook">
+                    <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // mobile nav
+    const ham = document.getElementById('ham');
+    const nav = document.getElementById('navlinks');
+    ham.addEventListener('click', () => nav.classList.toggle('open'));
+
+    // scroll-reveal
+    const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+        });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.pill-item, .feat-row-inner > *, .feat-card-sm').forEach((el, i) => {
+        el.dataset.delay = i % 9;
+        el.classList.add('will-animate');
+        io.observe(el);
+    });
+
+    setTimeout(() => {
+        document.querySelectorAll('.will-animate').forEach(el => el.classList.add('visible'));
+    }, 200);
+
+    // nav tint on scroll
+    window.addEventListener('scroll', () => {
+        document.querySelector('.site-nav').style.background =
+            window.scrollY > 40 ? 'rgba(6,13,26,0.92)' : 'rgba(6,13,26,0.72)';
+    });
+</script>
+</body>
+</html>
